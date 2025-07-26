@@ -150,11 +150,11 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "fr.vinarnt.animu.finder.MainKt"
+        mainClass = "fr.vinarnt.animu.finder.compose.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "fr.vinarnt.animu.finder"
+            packageName = "fr.vinarnt.animu.finder.compose"
             packageVersion = "1.0.0"
         }
     }
