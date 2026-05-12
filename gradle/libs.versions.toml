@@ -1,29 +1,29 @@
 [versions]
-agp = "8.10.1"
-android-compileSdk = "35"
+agp = "8.13.2"
+android-compileSdk = "36"
 android-minSdk = "24"
 android-targetSdk = "35"
-androidx-activity-compose = "1.10.1"
-androidx-core-ktx = "1.16.0"
-androidx-lifecycle = "2.9.0-alpha07"
+androidx-activity-compose = "1.13.0"
+androidx-core-ktx = "1.18.0"
+androidx-lifecycle = "2.10.0"
 androidx-test-junit = "1.2.1"
-compose-multiplatform = "1.8.0-rc01"
-compose-hot-reload = "1.0.0-alpha05"
+compose-multiplatform = "1.10.3"
 junit = "4.13.2"
-kotlin = "2.1.20"
-kotlinx-coroutines = "1.10.2"
-kotlinx-serialization-json = "1.8.1"
-ktor = "3.1.2"
-koin = "4.1.0-Beta7"
-kermit = "2.0.4"
+kotlin = "2.3.21"
+kotlinx-coroutines = "1.11.0"
+kotlinx-serialization-json = "1.11.0"
+ktor = "3.4.3"
+koin = "4.2.1"
+kermit = "2.1.0"
 voyager = "1.1.0-beta03"
 multiplatform-settings = "1.3.0"
-lyricist = "1.7.0"
-coil = "3.1.0"
+lyricist = "1.8.0"
+coil = "3.4.0"
 slf4j = "2.0.17"
-jikan4k = "1.0.0"
-lazy-pagination-compose = "1.7.0"
-material3Android = "1.3.2"
+jikan4k = "1.0.1"
+lazy-pagination-compose = "1.7.3"
+material3Android = "1.4.0"
+compose-ui-tooling = "1.10.3"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -58,6 +58,7 @@ coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" 
 coil-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 jikan4k = { module = "com.github.vinarnt.Jikan4k:jikan4k", version.ref = "jikan4k" }
 lazyPaginationCompose = { module = "io.github.ahmad-hamwi:lazy-pagination-compose", version.ref = "lazy-pagination-compose" }
+composeUITooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose-ui-tooling" }
 
 
 # Used only for desktop hot reload
@@ -70,7 +71,6 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "compose-hot-reload" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
