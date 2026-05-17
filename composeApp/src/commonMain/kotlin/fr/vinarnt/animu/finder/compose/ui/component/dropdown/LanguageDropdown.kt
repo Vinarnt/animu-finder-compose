@@ -6,8 +6,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.vinarnt.animu.finder.compose.i18n.Locales
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.service.SettingManager
-import fr.vinarnt.animu.finder.compose.ui.component.base.dropdown.SearchDropdown
-import fr.vinarnt.animu.finder.compose.ui.component.base.dropdown.SearchDropdownMenuItem
+import fr.vinarnt.animu.finder.compose.ui.component.base.input.dropdown.SearchDropdown
+import fr.vinarnt.animu.finder.compose.ui.component.base.input.dropdown.SearchDropdownMenuItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

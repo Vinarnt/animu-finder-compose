@@ -5,13 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CardDefaults.outlinedCardBorder
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -29,9 +23,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import co.touchlab.kermit.Logger
 import coil3.compose.AsyncImage
 import fr.vinarnt.animu.finder.compose.navigation.screen.anime.detail.AnimeDetailScreen
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
 
-@Preview
 @Composable
 fun AnimeCard(
     modifier: Modifier = Modifier,
@@ -47,11 +40,9 @@ fun AnimeCard(
         modifier = modifier
             .aspectRatio(3f / 4f)
             .hoverable(interactionSource = interactionSource)
-            .clickable(
-                onClick = {
-                    navigator.push(AnimeDetailScreen(malId))
-                }
-            ),
+            .clickable {
+                navigator.push(AnimeDetailScreen(malId))
+            },
         border = outlinedCardBorder(isHovered).copy(3.dp),
     ) {
         Box {
@@ -66,9 +57,9 @@ fun AnimeCard(
                 modifier = Modifier
                     .background(Color(0, 0, 0, 200))
                     .fillMaxWidth()
-                    .padding(10.dp)
+                    .padding(Spacing.sm)
                     .align(Alignment.BottomStart),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
             ) {
                 Text(
                     text = title,

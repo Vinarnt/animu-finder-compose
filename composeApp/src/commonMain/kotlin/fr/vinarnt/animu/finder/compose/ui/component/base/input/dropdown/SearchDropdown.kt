@@ -1,70 +1,33 @@
-package fr.vinarnt.animu.finder.compose.ui.component.base.dropdown
+package fr.vinarnt.animu.finder.compose.ui.component.base.input.dropdown
 
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.rememberTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuBoxScope
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.MenuItemColors
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.InputModeManager
-import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.PointerEventType
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import fr.vinarnt.animu.finder.compose.i18n.strings
+import fr.vinarnt.animu.finder.compose.ui.component.base.input.textfield.BaseTextField
+import fr.vinarnt.animu.finder.compose.ui.component.base.input.textfield.TextField
+import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
 import kotlin.math.max
 import kotlin.math.min
 
@@ -82,7 +45,7 @@ fun <T> SearchDropdown(
     noItemsContent: @Composable () -> Unit = {
         Text(
             strings.ui.dropdown.noContent,
-            modifier = Modifier.padding(8.dp).fillMaxWidth(),
+            modifier = Modifier.padding(Spacing.sm).fillMaxWidth(),
             textAlign = TextAlign.Center
         )
     },
@@ -91,7 +54,7 @@ fun <T> SearchDropdown(
     var searchText by remember { mutableStateOf("") }
     val filteredList by remember(items) {
         derivedStateOf {
-            items.filter { it ->
+            items.filter {
                 filter(it, searchText)
             }
         }
@@ -105,11 +68,11 @@ fun <T> SearchDropdown(
         },
         modifier = modifier
     ) {
-        OutlinedTextField(
+        TextField(
             value = displayText(selectedItem),
             onValueChange = { },
             modifier = Modifier
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 .pointerHoverIcon(PointerIcon.Default, true),
             readOnly = true,
             trailingIcon = {
@@ -124,13 +87,20 @@ fun <T> SearchDropdown(
             onDismissRequest = {
                 expanded = false
                 onExpandedChange(false)
-            },
+            }
         ) {
-            TextField(
+            BaseTextField(
                 value = searchText,
                 onValueChange = { searchText = it },
                 label = { Text(strings.ui.dropdown.search) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.border(0.dp, Color.Transparent).fillMaxWidth()
+            )
+
+            Spacer(
+                modifier = Modifier
+                    .height(1.dp)
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.outlineVariant)
             )
 
             if (searchText.isNotEmpty() && filteredList.isEmpty() || items.isEmpty()) {
@@ -377,11 +347,12 @@ internal fun DropdownMenuContent(
                 this.alpha = alpha
                 transformOrigin = transformOriginState.value
             },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
     ) {
         Column(
             modifier =
                 modifier
-                    .padding(vertical = 8.dp)
+                    .padding(vertical = Spacing.sm)
                     .width(IntrinsicSize.Max)
                     .verticalScroll(scrollState),
             content = content

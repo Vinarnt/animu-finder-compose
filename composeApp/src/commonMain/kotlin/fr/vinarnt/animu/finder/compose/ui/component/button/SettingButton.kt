@@ -5,12 +5,13 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.runtime.Composable
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.navigation.screen.setting.SettingScreen
-import fr.vinarnt.animu.finder.compose.ui.component.Tooltip
+import fr.vinarnt.animu.finder.compose.ui.component.base.Tooltip
 
 @Composable
 fun SettingButton() {
@@ -19,7 +20,8 @@ fun SettingButton() {
     Tooltip(
         tooltip = {
             Text(strings.settings.title)
-        }
+        },
+        anchorPosition = TooltipAnchorPosition.Below,
     ) {
         IconButton(
             onClick = {

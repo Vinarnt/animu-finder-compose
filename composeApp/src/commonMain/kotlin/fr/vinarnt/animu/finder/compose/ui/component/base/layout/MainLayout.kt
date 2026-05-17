@@ -10,7 +10,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import fr.vinarnt.animu.finder.compose.ui.theme.Size
+import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
 
 @Composable
 fun MainLayout(
@@ -26,7 +27,7 @@ fun MainLayout(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
-                    Modifier.width(1920.dp).padding(10.dp)
+                    Modifier.width(Size.maxContentWidth).padding(Spacing.sm)
                 ) {
                     content()
                 }
