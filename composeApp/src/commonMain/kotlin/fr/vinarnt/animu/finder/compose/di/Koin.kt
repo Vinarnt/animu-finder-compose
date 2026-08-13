@@ -19,6 +19,7 @@ import io.ktor.client.plugins.logging.Logger as KtorLogger
 private val commonModule = module {
     single<JikanClient> {
         JikanClient(
+            baseUrl = "https://api.tenrai.org/v1",
             httpClientConfig = { config ->
                 with(config) {
                     install(Logging) {
