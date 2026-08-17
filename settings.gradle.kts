@@ -18,6 +18,7 @@ pluginManagement {
 dependencyResolutionManagement {
     repositories {
         maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://jogamp.org/deployment/maven") }
         google {
             mavenContent {
                 includeGroupAndSubgroups("androidx")

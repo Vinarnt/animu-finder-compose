@@ -1,5 +1,6 @@
 package fr.vinarnt.animu.finder.compose.ui.component.anime.detail
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
@@ -18,10 +19,11 @@ import fr.vinarnt.jikan4k.models.AnimeEpisodesAllOfData
 @Composable
 fun EpisodeItem(
     episode: AnimeEpisodesAllOfData,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
 ) {
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
         shape = RoundedCornerShape(CornerRadius.sm),
         color = MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = Elevation.sm

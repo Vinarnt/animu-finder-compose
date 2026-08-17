@@ -117,5 +117,16 @@ val FrStrings = Strings(
         airedDescription = "Date de début de diffusion",
         statusDescription = "Statut de diffusion",
         synopsisLabel = "Synopsis"
+    ),
+    episodeDetail = EpisodeDetailStrings(
+        alternativeTitles = "Titres alternatifs",
+        airingDate = "Date de diffusion",
+        synopsis = "Synopsis",
+        streams = "Streams disponibles",
+        noStreams = "Aucun stream trouvé",
+        couldNotLoadStreams = "Impossible de charger les streams",
+        noSource = "Aucune source sélectionnée",
+        dub = "VF",
+        sub = "VOSTFR"
     )
 )

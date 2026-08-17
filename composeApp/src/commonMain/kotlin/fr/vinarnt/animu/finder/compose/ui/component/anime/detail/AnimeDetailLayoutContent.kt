@@ -13,9 +13,13 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import fr.vinarnt.animu.finder.compose.navigation.screen.anime.detail.EpisodeDetailScreen
 import fr.vinarnt.animu.finder.compose.ui.theme.Size
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeDetailViewModel
+import fr.vinarnt.jikan4k.models.Anime
 import io.github.ahmad_hamwi.compose.pagination.PaginatedLazyColumn
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -23,6 +27,8 @@ import org.koin.compose.viewmodel.koinViewModel
 fun AnimeDetailLayoutContent(modifier: Modifier = Modifier, lazyListState: LazyListState) {
     val vm: AnimeDetailViewModel = koinViewModel()
     val episodesPaginationState by vm.episodesPaginationState.collectAsStateWithLifecycle()
+    val anime by vm.anime.collectAsStateWithLifecycle()
+    val navigator = LocalNavigator.currentOrThrow
 
     key(episodesPaginationState) {
         PaginatedLazyColumn(
@@ -62,8 +68,32 @@ fun AnimeDetailLayoutContent(modifier: Modifier = Modifier, lazyListState: LazyL
                 count = episodes.size,
                 key = { index -> "episode:${episodes[index].malId ?: index}" }
             ) { index ->
-                EpisodeItem(episode = episodes[index])
+                val episode = episodes[index]
+                EpisodeItem(
+                    episode = episode,
+                    onClick = {
+                        val a = anime
+                        val malId = a?.malId
+                        val episodeNumber = episode.malId
+                        if (a != null && malId != null && episodeNumber != null) {
+                            navigator.push(
+                                EpisodeDetailScreen(
+                                    animeId = malId,
+                                    episodeNumber = episodeNumber,
+                                    animeTitle = resolveAnimeTitle(a),
+                                    altTitles = a.titles?.mapNotNull { it.title }.orEmpty(),
+                                    totalEpisodes = a.episodes,
+                                )
+                            )
+                        }
+                    }
+                )
             }
         }
     }
 }
+
+fun resolveAnimeTitle(anime: Anime): String =
+    anime.titles?.firstOrNull { it.type in listOf("English", "Default") }?.title
+        ?: anime.titles?.firstOrNull()?.title
+        ?: "Unknown"

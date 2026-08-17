@@ -2,6 +2,7 @@ package fr.vinarnt.animu.finder.compose.repository
 
 import fr.vinarnt.jikan4k.JikanClient
 import fr.vinarnt.jikan4k.models.Anime
+import fr.vinarnt.jikan4k.models.AnimeEpisode
 import fr.vinarnt.jikan4k.models.AnimeEpisodes
 import fr.vinarnt.jikan4k.models.AnimeSearch
 import fr.vinarnt.jikan4k.models.AnimeSearchQueryOrderby
@@ -42,4 +43,8 @@ class AnimeRepository(private val jikan: JikanClient) {
 
     suspend fun getAnimeEpisodes(id: Int, page: Int = 1): AnimeEpisodes =
         jikan.animes.getAnimeEpisodes(id, page = page).body()
+
+    suspend fun getAnimeEpisodeById(id: Int, episode: Int): AnimeEpisode =
+        jikan.animes.getAnimeEpisodeById(id, episode).body().data
+            ?: throw Exception("Episode $episode of anime $id not found")
 }

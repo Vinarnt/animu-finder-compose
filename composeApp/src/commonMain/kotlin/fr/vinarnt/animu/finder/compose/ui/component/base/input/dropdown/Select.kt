@@ -18,8 +18,8 @@ fun <T> Select(
     options: List<T>,
     label: String,
     onValueChangedEvent: (T) -> Unit,
-    displayOption: @Composable (T) -> String = { it.toString() },
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    displayOption: @Composable (T) -> String = { it.toString() }
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -51,7 +51,10 @@ fun <T> Select(
             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
         }
 
-        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        ExposedSearchableDropDownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
             options.forEach { option: T ->
                 DropdownMenuItem(
                     text = { Text(text = displayOption(option)) },

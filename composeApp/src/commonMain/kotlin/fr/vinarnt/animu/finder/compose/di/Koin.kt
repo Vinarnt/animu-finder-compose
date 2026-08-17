@@ -2,8 +2,14 @@ package fr.vinarnt.animu.finder.compose.di
 
 import fr.vinarnt.animu.finder.compose.logger.KermitKoinLogger
 import fr.vinarnt.animu.finder.compose.repository.AnimeRepository
+import fr.vinarnt.animu.finder.compose.repository.extractor.ExtractorHttpClient
+import fr.vinarnt.animu.finder.compose.repository.extractor.StreamRepository
+import fr.vinarnt.animu.finder.compose.repository.extractor.StreamingExtractor
+import fr.vinarnt.animu.finder.compose.repository.extractor.VoirAnimeExtractor
+import fr.vinarnt.animu.finder.compose.repository.extractor.provideExtractorHttpClient
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeDetailViewModel
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeListViewModel
+import fr.vinarnt.animu.finder.compose.viewmodel.EpisodeDetailViewModel
 import fr.vinarnt.jikan4k.JikanClient
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
@@ -37,8 +43,20 @@ private val commonModule = module {
 
     viewModelOf(::AnimeListViewModel)
     viewModelOf(::AnimeDetailViewModel)
+    viewModelOf(::EpisodeDetailViewModel)
 
     singleOf(::AnimeRepository)
+
+    single { provideExtractorHttpClient() }
+
+    single<List<StreamingExtractor>> {
+        val http: ExtractorHttpClient = get()
+        listOf(
+            VoirAnimeExtractor(http),
+        )
+    }
+
+    singleOf(::StreamRepository)
 }
 
 val appModule = module {

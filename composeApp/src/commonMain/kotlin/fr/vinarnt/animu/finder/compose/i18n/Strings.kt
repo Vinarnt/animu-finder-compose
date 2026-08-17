@@ -12,6 +12,7 @@ data class Strings(
     val languages: LanguagesStrings,
     val animeList: AnimeListStrings,
     val animeDetail: AnimeDetailStrings,
+    val episodeDetail: EpisodeDetailStrings,
 )
 
 data class NavigationStrings(
@@ -63,6 +64,18 @@ data class AnimeDetailStrings(
     val airedDescription: String,
     val statusDescription: String,
     val synopsisLabel: String
+)
+
+data class EpisodeDetailStrings(
+    val alternativeTitles: String,
+    val airingDate: String,
+    val synopsis: String,
+    val streams: String,
+    val noStreams: String,
+    val couldNotLoadStreams: String,
+    val noSource: String,
+    val dub: String,
+    val sub: String
 )
 
 data class AnimeListStrings(

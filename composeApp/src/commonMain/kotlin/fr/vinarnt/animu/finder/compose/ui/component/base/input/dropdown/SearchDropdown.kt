@@ -25,6 +25,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import fr.vinarnt.animu.finder.compose.i18n.strings
+import fr.vinarnt.animu.finder.compose.ui.component.base.appVerticalScrollbar
 import fr.vinarnt.animu.finder.compose.ui.component.base.input.textfield.BaseTextField
 import fr.vinarnt.animu.finder.compose.ui.component.base.input.textfield.TextField
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
@@ -354,7 +355,7 @@ internal fun DropdownMenuContent(
                 modifier
                     .padding(vertical = Spacing.sm)
                     .width(IntrinsicSize.Max)
-                    .verticalScroll(scrollState),
+                    .appVerticalScrollbar(scrollState),
             content = content
         )
     }

@@ -105,6 +105,17 @@ val EnStrings = Strings(
         airedDescription = "Start airing date",
         statusDescription = "Airing status",
         synopsisLabel = "Synopsis"
+    ),
+    episodeDetail = EpisodeDetailStrings(
+        alternativeTitles = "Alternative titles",
+        airingDate = "Airing date",
+        synopsis = "Synopsis",
+        streams = "Available streams",
+        noStreams = "No stream found",
+        couldNotLoadStreams = "Could not load streams",
+        noSource = "No source selected",
+        dub = "DUB",
+        sub = "SUB"
     )
 )
 

@@ -98,6 +98,7 @@ kotlin {
                 implementation(libs.bundles.coil)
                 implementation(libs.jikan4k)
                 implementation(libs.lazyPaginationCompose)
+                implementation(libs.compose.multiplatform.media.player)
             }
         }
         desktopMain.dependencies {
