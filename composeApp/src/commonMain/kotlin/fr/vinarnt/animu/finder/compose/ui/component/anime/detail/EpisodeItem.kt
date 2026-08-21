@@ -1,6 +1,9 @@
 package fr.vinarnt.animu.finder.compose.ui.component.anime.detail
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
@@ -8,25 +11,37 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fr.vinarnt.animu.finder.compose.ui.theme.CornerRadius
 import fr.vinarnt.animu.finder.compose.ui.theme.Elevation
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
-import fr.vinarnt.jikan4k.models.AnimeEpisodesAllOfData
+import fr.vinarnt.jikan4k.models.GetAnimeByIdEpisodes200ResponseDataInner
 
 @Composable
 fun EpisodeItem(
-    episode: AnimeEpisodesAllOfData,
+    episode: GetAnimeByIdEpisodes200ResponseDataInner,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
     Surface(
-        modifier = modifier.fillMaxWidth().clickable(onClick = onClick),
+        modifier = modifier
+            .fillMaxWidth()
+            .hoverable(interactionSource = interactionSource)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(CornerRadius.sm),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        tonalElevation = Elevation.sm
+        color = if (isHovered) {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerLow
+        },
+        tonalElevation = if (isHovered) Elevation.md else Elevation.sm
     ) {
         Row(
             modifier = Modifier
@@ -62,7 +77,6 @@ fun EpisodeItem(
             }
             episode.aired?.let { date ->
                 Text(
-                    // TODO: Use kotlinx-datetime to format
                     text = date.take(10),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant

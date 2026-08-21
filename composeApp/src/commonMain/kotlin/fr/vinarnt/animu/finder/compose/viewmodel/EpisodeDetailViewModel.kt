@@ -8,7 +8,7 @@ import fr.vinarnt.animu.finder.compose.repository.AnimeRepository
 import fr.vinarnt.animu.finder.compose.repository.extractor.EpisodeSearchQuery
 import fr.vinarnt.animu.finder.compose.repository.extractor.ProviderError
 import fr.vinarnt.animu.finder.compose.repository.extractor.StreamRepository
-import fr.vinarnt.jikan4k.models.AnimeEpisode
+import fr.vinarnt.jikan4k.models.GetAnimeByIdEpisodesByEpisodeId200ResponseData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,8 +19,8 @@ class EpisodeDetailViewModel(
     private val streamRepository: StreamRepository,
 ) : ViewModel() {
 
-    private val _episode = MutableStateFlow<AnimeEpisode?>(null)
-    val episode: StateFlow<AnimeEpisode?> = _episode.asStateFlow()
+    private val _episode = MutableStateFlow<GetAnimeByIdEpisodesByEpisodeId200ResponseData?>(null)
+    val episode: StateFlow<GetAnimeByIdEpisodesByEpisodeId200ResponseData?> = _episode.asStateFlow()
 
     private val _streams = MutableStateFlow<List<StreamSource>>(emptyList())
     val streams: StateFlow<List<StreamSource>> = _streams.asStateFlow()
