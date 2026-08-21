@@ -13,13 +13,12 @@ import androidx.compose.ui.text.font.FontWeight
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.ui.component.base.Tooltip
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
-import fr.vinarnt.jikan4k.models.Anime
 
 @Composable
 fun AnimeDetailSubtitle(
     studios: List<String>?,
     airedYear: Int?,
-    status: Anime.Status?,
+    status: String?,
     modifier: Modifier = Modifier
 ) {
     Row(

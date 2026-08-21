@@ -36,7 +36,8 @@ class AnimeDetailScreen(private val malId: Int) : Screen {
                 NavigationBar() {
                     SettingButton()
                 }
-            }
+            },
+            scrollable = false
         ) {
             if (anime == null) {
                 Box(

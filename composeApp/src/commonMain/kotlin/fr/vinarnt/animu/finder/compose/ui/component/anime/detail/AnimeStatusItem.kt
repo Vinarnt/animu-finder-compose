@@ -17,17 +17,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
-import fr.vinarnt.jikan4k.models.Anime
 
 @Composable
 fun AnimeStatusItem(
-    status: Anime.Status?,
+    status: String?,
     modifier: Modifier = Modifier
 ) {
     val (icon, label) = when (status) {
-        Anime.Status.FINISHED_AIRING -> Icons.Default.CheckCircle to "Finished"
-        Anime.Status.CURRENTLY_AIRING -> Icons.Default.PlayCircle to "Airing"
-        Anime.Status.NOT_YET_AIRED -> Icons.Default.Schedule to "Not yet aired"
+        "Finished Airing" -> Icons.Default.CheckCircle to "Finished"
+        "Currently Airing" -> Icons.Default.PlayCircle to "Airing"
+        "Not yet aired" -> Icons.Default.Schedule to "Not yet aired"
         else -> Icons.Default.Schedule to "N/A"
     }
     val iconSize = with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() }

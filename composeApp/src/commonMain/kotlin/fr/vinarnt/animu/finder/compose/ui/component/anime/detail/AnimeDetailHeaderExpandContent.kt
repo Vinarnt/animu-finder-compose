@@ -16,8 +16,7 @@ import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
 fun AnimeDetailHeaderExpandContent(synopsis: String) {
     FlowRow(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(Spacing.md),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
@@ -25,7 +24,7 @@ fun AnimeDetailHeaderExpandContent(synopsis: String) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = Spacing.sm, vertical = Spacing.xs),
+                    .padding(vertical = Spacing.xs),
                 verticalArrangement = Arrangement.spacedBy(Spacing.xs)
             ) {
                 Text(

@@ -5,26 +5,22 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
-import fr.vinarnt.animu.finder.compose.ui.theme.CornerRadius
-import fr.vinarnt.animu.finder.compose.ui.theme.Elevation
+import androidx.compose.ui.unit.dp
+import fr.vinarnt.animu.finder.compose.ui.theme.Size
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
-import fr.vinarnt.jikan4k.models.Anime
+import fr.vinarnt.jikan4k.models.GetAnimeById200ResponseData
 
 @Composable
 fun AnimeDetailLayout(
-    anime: Anime,
+    anime: GetAnimeById200ResponseData,
     modifier: Modifier = Modifier
 ) {
     val lazyListState = rememberLazyListState()
@@ -34,13 +30,9 @@ fun AnimeDetailLayout(
     val nestedScrollConnection = remember(lazyListState) {
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // Collapse when scrolling down
                 if (available.y < -1f && isExpandedState.value) {
                     isExpandedState.value = false
-                }
-
-                // Expand when scrolling up and content is at the top
-                else if (available.y > 1f && !isExpandedState.value) {
+                } else if (available.y > 1f && !isExpandedState.value) {
                     val isAtTop =
                         (lazyListState.firstVisibleItemIndex == 0 && lazyListState.firstVisibleItemScrollOffset == 0)
                     if (isAtTop) {
@@ -51,7 +43,6 @@ fun AnimeDetailLayout(
             }
 
             override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-                // Expand when scrolling up and content has reached the top
                 if (available.y > 1f && !isExpandedState.value) {
                     isExpandedState.value = true
                 }
@@ -60,7 +51,7 @@ fun AnimeDetailLayout(
         }
     }
 
-    Column(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection)
@@ -77,32 +68,37 @@ fun AnimeDetailLayout(
                 }
             }
     ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Spacing.sm)
-                .shadow(elevation = Elevation.lg, shape = RoundedCornerShape(CornerRadius.md)),
-            color = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(CornerRadius.md),
-            tonalElevation = Elevation.sm
+        val sidePadding = ((maxWidth - Size.maxContentWidth) / 2f).coerceAtLeast(0.dp)
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                AnimeDetailLayoutStaticHeader(anime, isExpanded)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = sidePadding + Spacing.sm, vertical = Spacing.sm)
+            ) {
+                AnimeDetailLayoutStaticHeader(anime = anime, isExpanded = isExpanded)
+            }
 
-                AnimatedVisibility(
-                    visible = isExpanded,
-                    enter = expandVertically(),
-                    exit = shrinkVertically()
-                ) {
-                    if (anime.synopsis != null) {
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                if (anime.synopsis != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = sidePadding + Spacing.sm, vertical = Spacing.sm)
+                    ) {
                         AnimeDetailHeaderExpandContent(anime.synopsis!!)
                     }
                 }
             }
-        }
 
-        Box(modifier = Modifier.weight(1f)) {
-            AnimeDetailLayoutContent(modifier, lazyListState)
+            Box(modifier = Modifier.weight(1f)) {
+                AnimeDetailLayoutContent(modifier, lazyListState)
+            }
         }
     }
 }
