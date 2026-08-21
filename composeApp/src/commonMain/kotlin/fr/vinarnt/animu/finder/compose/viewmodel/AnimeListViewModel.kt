@@ -4,75 +4,99 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import fr.vinarnt.animu.finder.compose.model.AnimeGenre
+import fr.vinarnt.animu.finder.compose.model.ContinueWatchingEntry
 import fr.vinarnt.animu.finder.compose.repository.AnimeRepository
-import fr.vinarnt.jikan4k.models.Anime
-import fr.vinarnt.jikan4k.models.AnimeSearchQueryRating
-import fr.vinarnt.jikan4k.models.AnimeSearchQueryStatus
-import fr.vinarnt.jikan4k.models.AnimeTypes
+import fr.vinarnt.animu.finder.compose.service.SettingManager
+import fr.vinarnt.jikan4k.apis.AnimeApi
+import fr.vinarnt.jikan4k.models.GetAnime200ResponseDataInner
+import fr.vinarnt.jikan4k.models.GetAnimeById200ResponseData
 import io.github.ahmad_hamwi.compose.pagination.PaginationState
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
+
+private const val MAX_RESUME = 8
+
+data class ContinueWatchingItem(
+    val entry: ContinueWatchingEntry,
+    val anime: GetAnimeById200ResponseData?,
+)
 
 data class AnimeSearchFilters(
     val queryText: String = "",
     val scoreRange: ClosedFloatingPointRange<Float> = 1f..10f,
-    val type: AnimeTypes? = null,
-    val status: AnimeSearchQueryStatus? = null,
-    val rating: AnimeSearchQueryRating? = null,
+    val type: AnimeApi.TypeGetAnime? = null,
+    val status: AnimeApi.StatusGetAnime? = null,
+    val rating: AnimeApi.RatingGetAnime? = null,
     val genres: Set<AnimeGenre> = emptySet()
 )
 
-class AnimeListViewModel(private val animeRepository: AnimeRepository) : ViewModel() {
+class AnimeListViewModel(
+    private val animeRepository: AnimeRepository,
+    private val settingManager: SettingManager,
+) : ViewModel() {
 
     private val _filters = MutableStateFlow(AnimeSearchFilters())
     val filters: StateFlow<AnimeSearchFilters> = _filters.asStateFlow()
 
     private val _paginationState = MutableStateFlow(createPaginationState(AnimeSearchFilters()))
-    val paginationState: StateFlow<PaginationState<Int, Anime>> = _paginationState.asStateFlow()
+    val paginationState: StateFlow<PaginationState<Int, GetAnime200ResponseDataInner>> = _paginationState.asStateFlow()
 
-    private var searchDebounceJob: Job? = null
+    val continueWatching: StateFlow<List<ContinueWatchingEntry>> =
+        settingManager.getWatchHistory()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun updateQuery(text: String) {
-        searchDebounceJob?.cancel()
-        _filters.value = _filters.value.copy(queryText = text)
-        searchDebounceJob = viewModelScope.launch {
-            delay(400.milliseconds)
-            _paginationState.value = createPaginationState(_filters.value)
+    private val _resumeItems = MutableStateFlow<List<ContinueWatchingItem>>(emptyList())
+    val resumeItems: StateFlow<List<ContinueWatchingItem>> = _resumeItems.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            continueWatching.collect { entries ->
+                val items = entries.take(MAX_RESUME).map { ContinueWatchingItem(it, null) }
+                _resumeItems.value = items
+                items.forEach { item ->
+                    viewModelScope.launch {
+                        val anime = runCatching { animeRepository.getAnimeById(item.entry.animeId) }.getOrNull()
+                        _resumeItems.update { list ->
+                            list.map {
+                                if (it.entry.animeId == item.entry.animeId) it.copy(anime = anime) else it
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
-    fun updateType(type: AnimeTypes?) {
-        searchDebounceJob?.cancel()
+    fun updateQuery(text: String) {
+        _filters.value = _filters.value.copy(queryText = text)
+    }
+
+    fun updateType(type: AnimeApi.TypeGetAnime?) {
         applyFilters(_filters.value.copy(type = type))
     }
 
-    fun updateStatus(status: AnimeSearchQueryStatus?) {
-        searchDebounceJob?.cancel()
+    fun updateStatus(status: AnimeApi.StatusGetAnime?) {
         applyFilters(_filters.value.copy(status = status))
     }
 
-    fun updateRating(rating: AnimeSearchQueryRating?) {
-        searchDebounceJob?.cancel()
+    fun updateRating(rating: AnimeApi.RatingGetAnime?) {
         applyFilters(_filters.value.copy(rating = rating))
     }
 
     fun updateGenres(genres: Set<AnimeGenre>) {
-        searchDebounceJob?.cancel()
         applyFilters(_filters.value.copy(genres = genres))
     }
 
     fun updateScoreRange(range: ClosedFloatingPointRange<Float>) {
-        searchDebounceJob?.cancel()
-        applyFilters(_filters.value.copy(scoreRange = range))
+        _filters.value = _filters.value.copy(scoreRange = range)
     }
 
-    fun commitScoreRange() {
-        searchDebounceJob?.cancel()
+    fun applyCurrentFilters() {
         applyFilters(_filters.value)
     }
 
@@ -81,8 +105,8 @@ class AnimeListViewModel(private val animeRepository: AnimeRepository) : ViewMod
         _paginationState.value = createPaginationState(newFilters)
     }
 
-    private fun createPaginationState(appliedFilters: AnimeSearchFilters): PaginationState<Int, Anime> {
-        lateinit var state: PaginationState<Int, Anime>
+    private fun createPaginationState(appliedFilters: AnimeSearchFilters): PaginationState<Int, GetAnime200ResponseDataInner> {
+        lateinit var state: PaginationState<Int, GetAnime200ResponseDataInner>
         state = PaginationState(
             initialPageKey = 1,
             onRequestPage = { page -> fetchAnimes(appliedFilters, page, state) }
@@ -90,7 +114,7 @@ class AnimeListViewModel(private val animeRepository: AnimeRepository) : ViewMod
         return state
     }
 
-    private fun fetchAnimes(fetchFilters: AnimeSearchFilters, page: Int, state: PaginationState<Int, Anime>) {
+    private fun fetchAnimes(fetchFilters: AnimeSearchFilters, page: Int, state: PaginationState<Int, GetAnime200ResponseDataInner>) {
         viewModelScope.launch {
             try {
                 animeRepository.searchAnimes(
@@ -104,8 +128,8 @@ class AnimeListViewModel(private val animeRepository: AnimeRepository) : ViewMod
                     genres = fetchFilters.genres
                 ).let {
                     state.appendPage(
-                        items = it.data ?: emptyList(),
-                        isLastPage = it.pagination?.hasNextPage != true,
+                        items = it.data,
+                        isLastPage = it.pagination.hasNextPage != true,
                         nextPageKey = page + 1
                     )
                 }
