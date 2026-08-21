@@ -2,9 +2,7 @@ package fr.vinarnt.animu.finder.compose.i18n
 
 import cafe.adriel.lyricist.LyricistStrings
 import fr.vinarnt.animu.finder.compose.model.AnimeGenre
-import fr.vinarnt.jikan4k.models.AnimeSearchQueryRating
-import fr.vinarnt.jikan4k.models.AnimeSearchQueryStatus
-import fr.vinarnt.jikan4k.models.AnimeTypes
+import fr.vinarnt.jikan4k.apis.AnimeApi
 
 private val languages = mapOf(
     Locales.EN to "Anglais",
@@ -15,6 +13,10 @@ private val languages = mapOf(
 val FrStrings = Strings(
     navigation = NavigationStrings(
         back = "Retour"
+    ),
+    home = HomeStrings(
+        continueWatching = "Reprendre la lecture",
+        resume = "Reprendre"
     ),
     ui = UIStrings(
         dropdown = DropdownStrings(
@@ -34,7 +36,12 @@ val FrStrings = Strings(
         ),
         locale = SettingLocaleStrings(
             label = "Langue"
-        )
+        ),
+        appearance = "Apparence",
+        playback = "Lecture",
+        defaultQuality = "Qualité par défaut",
+        preferredSubtitles = "Sous-titres préférés",
+        autoplayNext = "Lecture automatique"
     ),
     languages = LanguagesStrings(
         locales = languages.keys.toList(),
@@ -49,28 +56,28 @@ val FrStrings = Strings(
         scoreLabel = "Score",
         all = "Tous",
         typeLabels = mapOf(
-            AnimeTypes.TV to "TV",
-            AnimeTypes.MOVIE to "Film",
-            AnimeTypes.OVA to "OVA",
-            AnimeTypes.SPECIAL to "Spécial",
-            AnimeTypes.ONA to "ONA",
-            AnimeTypes.MUSIC to "Musique",
-            AnimeTypes.CM to "CM",
-            AnimeTypes.PV to "PV",
-            AnimeTypes.TV_SPECIAL to "TV Spécial"
+            AnimeApi.TypeGetAnime.TV to "TV",
+            AnimeApi.TypeGetAnime.MOVIE to "Film",
+            AnimeApi.TypeGetAnime.OVA to "OVA",
+            AnimeApi.TypeGetAnime.SPECIAL to "Spécial",
+            AnimeApi.TypeGetAnime.ONA to "ONA",
+            AnimeApi.TypeGetAnime.MUSIC to "Musique",
+            AnimeApi.TypeGetAnime.CM to "CM",
+            AnimeApi.TypeGetAnime.PV to "PV",
+            AnimeApi.TypeGetAnime.TV_SPECIAL to "TV Spécial"
         ),
         statusLabels = mapOf(
-            AnimeSearchQueryStatus.AIRING to "En cours",
-            AnimeSearchQueryStatus.COMPLETE to "Terminé",
-            AnimeSearchQueryStatus.UPCOMING to "À venir"
+            AnimeApi.StatusGetAnime.AIRING to "En cours",
+            AnimeApi.StatusGetAnime.COMPLETE to "Terminé",
+            AnimeApi.StatusGetAnime.UPCOMING to "À venir"
         ),
         ratingLabels = mapOf(
-            AnimeSearchQueryRating.G to "G – Tout public",
-            AnimeSearchQueryRating.PG to "PG – Enfants",
-            AnimeSearchQueryRating.PG13 to "PG-13 – Ados",
-            AnimeSearchQueryRating.R17 to "R-17",
-            AnimeSearchQueryRating.R to "R+",
-            AnimeSearchQueryRating.RX to "Rx – Hentai"
+            AnimeApi.RatingGetAnime.G to "G – Tout public",
+            AnimeApi.RatingGetAnime.PG to "PG – Enfants",
+            AnimeApi.RatingGetAnime.PG13 to "PG-13 – Ados",
+            AnimeApi.RatingGetAnime.R17 to "R-17",
+            AnimeApi.RatingGetAnime.R to "R+",
+            AnimeApi.RatingGetAnime.RX to "Rx – Hentai"
         ),
         genreLabel = "Genre",
         genreCount = { n -> "$n genres" },
@@ -113,10 +120,12 @@ val FrStrings = Strings(
         scoreDescription = "Score moyen sur 10",
         rankDescription = "Classement par score",
         popularityDescription = "Classement par popularité",
+        membersDescription = "Nombre de membres",
         studiosDescription = "Studios de production",
         airedDescription = "Date de début de diffusion",
         statusDescription = "Statut de diffusion",
-        synopsisLabel = "Synopsis"
+        synopsisLabel = "Synopsis",
+        episodesLabel = "Épisodes"
     ),
     episodeDetail = EpisodeDetailStrings(
         alternativeTitles = "Titres alternatifs",
@@ -127,6 +136,12 @@ val FrStrings = Strings(
         couldNotLoadStreams = "Impossible de charger les streams",
         noSource = "Aucune source sélectionnée",
         dub = "VF",
-        sub = "VOSTFR"
+        sub = "VOSTFR",
+        upNext = "À suivre",
+        nextEpisode = "Épisode suivant",
+        filler = "Filler",
+        recap = "Récapitulatif",
+        score = "Score",
+        episodeNumber = "Épisode {number}"
     )
 )

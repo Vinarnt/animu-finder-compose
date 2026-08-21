@@ -1,12 +1,11 @@
 package fr.vinarnt.animu.finder.compose.i18n
 
 import fr.vinarnt.animu.finder.compose.model.AnimeGenre
-import fr.vinarnt.jikan4k.models.AnimeSearchQueryRating
-import fr.vinarnt.jikan4k.models.AnimeSearchQueryStatus
-import fr.vinarnt.jikan4k.models.AnimeTypes
+import fr.vinarnt.jikan4k.apis.AnimeApi
 
 data class Strings(
     val navigation: NavigationStrings,
+    val home: HomeStrings,
     val ui: UIStrings,
     val settings: SettingStrings,
     val languages: LanguagesStrings,
@@ -19,10 +18,20 @@ data class NavigationStrings(
     val back: String
 )
 
+data class HomeStrings(
+    val continueWatching: String,
+    val resume: String
+)
+
 data class SettingStrings(
     val title: String,
     val theme: SettingThemeStrings,
-    val locale: SettingLocaleStrings
+    val locale: SettingLocaleStrings,
+    val appearance: String,
+    val playback: String,
+    val defaultQuality: String,
+    val preferredSubtitles: String,
+    val autoplayNext: String
 )
 
 data class SettingThemeStrings(
@@ -60,10 +69,12 @@ data class AnimeDetailStrings(
     val scoreDescription: String,
     val rankDescription: String,
     val popularityDescription: String,
+    val membersDescription: String,
     val studiosDescription: String,
     val airedDescription: String,
     val statusDescription: String,
-    val synopsisLabel: String
+    val synopsisLabel: String,
+    val episodesLabel: String
 )
 
 data class EpisodeDetailStrings(
@@ -75,7 +86,13 @@ data class EpisodeDetailStrings(
     val couldNotLoadStreams: String,
     val noSource: String,
     val dub: String,
-    val sub: String
+    val sub: String,
+    val upNext: String,
+    val nextEpisode: String,
+    val filler: String,
+    val recap: String,
+    val score: String,
+    val episodeNumber: String
 )
 
 data class AnimeListStrings(
@@ -85,9 +102,9 @@ data class AnimeListStrings(
     val ratingLabel: String,
     val scoreLabel: String,
     val all: String,
-    val typeLabels: Map<AnimeTypes, String>,
-    val statusLabels: Map<AnimeSearchQueryStatus, String>,
-    val ratingLabels: Map<AnimeSearchQueryRating, String>,
+    val typeLabels: Map<AnimeApi.TypeGetAnime, String>,
+    val statusLabels: Map<AnimeApi.StatusGetAnime, String>,
+    val ratingLabels: Map<AnimeApi.RatingGetAnime, String>,
     val genreLabel: String,
     val genreCount: (Int) -> String,
     val genreNames: Map<AnimeGenre, String>

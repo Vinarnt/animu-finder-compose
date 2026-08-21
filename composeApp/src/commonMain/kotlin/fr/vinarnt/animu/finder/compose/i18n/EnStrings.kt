@@ -2,9 +2,7 @@ package fr.vinarnt.animu.finder.compose.i18n
 
 import cafe.adriel.lyricist.LyricistStrings
 import fr.vinarnt.animu.finder.compose.model.AnimeGenre
-import fr.vinarnt.jikan4k.models.AnimeSearchQueryRating
-import fr.vinarnt.jikan4k.models.AnimeSearchQueryStatus
-import fr.vinarnt.jikan4k.models.AnimeTypes
+import fr.vinarnt.jikan4k.apis.AnimeApi
 
 private val languages = mapOf(
     Locales.EN to "English", Locales.FR to "French"
@@ -14,6 +12,9 @@ private val languages = mapOf(
 val EnStrings = Strings(
     navigation = NavigationStrings(
         back = "Back"
+    ), home = HomeStrings(
+        continueWatching = "Continue watching",
+        resume = "Resume"
     ), ui = UIStrings(
         dropdown = DropdownStrings(
             search = "Search", noContent = "No item matching"
@@ -25,7 +26,12 @@ val EnStrings = Strings(
             )
         ), locale = SettingLocaleStrings(
             label = "Language"
-        )
+        ),
+        appearance = "Appearance",
+        playback = "Playback",
+        defaultQuality = "Default quality",
+        preferredSubtitles = "Preferred subtitles",
+        autoplayNext = "Autoplay next episode"
     ), languages = LanguagesStrings(
         locales = languages.keys.toList(),
         localeLabels = languages,
@@ -37,28 +43,28 @@ val EnStrings = Strings(
         scoreLabel = "Score",
         all = "All",
         typeLabels = mapOf(
-            AnimeTypes.TV to "TV",
-            AnimeTypes.MOVIE to "Movie",
-            AnimeTypes.OVA to "OVA",
-            AnimeTypes.SPECIAL to "Special",
-            AnimeTypes.ONA to "ONA",
-            AnimeTypes.MUSIC to "Music",
-            AnimeTypes.CM to "CM",
-            AnimeTypes.PV to "PV",
-            AnimeTypes.TV_SPECIAL to "TV Special"
+            AnimeApi.TypeGetAnime.TV to "TV",
+            AnimeApi.TypeGetAnime.MOVIE to "Movie",
+            AnimeApi.TypeGetAnime.OVA to "OVA",
+            AnimeApi.TypeGetAnime.SPECIAL to "Special",
+            AnimeApi.TypeGetAnime.ONA to "ONA",
+            AnimeApi.TypeGetAnime.MUSIC to "Music",
+            AnimeApi.TypeGetAnime.CM to "CM",
+            AnimeApi.TypeGetAnime.PV to "PV",
+            AnimeApi.TypeGetAnime.TV_SPECIAL to "TV Special"
         ),
         statusLabels = mapOf(
-            AnimeSearchQueryStatus.AIRING to "Airing",
-            AnimeSearchQueryStatus.COMPLETE to "Finished",
-            AnimeSearchQueryStatus.UPCOMING to "Upcoming"
+            AnimeApi.StatusGetAnime.AIRING to "Airing",
+            AnimeApi.StatusGetAnime.COMPLETE to "Finished",
+            AnimeApi.StatusGetAnime.UPCOMING to "Upcoming"
         ),
         ratingLabels = mapOf(
-            AnimeSearchQueryRating.G to "G – All ages",
-            AnimeSearchQueryRating.PG to "PG – Children",
-            AnimeSearchQueryRating.PG13 to "PG-13 – Teens",
-            AnimeSearchQueryRating.R17 to "R-17",
-            AnimeSearchQueryRating.R to "R+",
-            AnimeSearchQueryRating.RX to "Rx – Hentai"
+            AnimeApi.RatingGetAnime.G to "G – All ages",
+            AnimeApi.RatingGetAnime.PG to "PG – Children",
+            AnimeApi.RatingGetAnime.PG13 to "PG-13 – Teens",
+            AnimeApi.RatingGetAnime.R17 to "R-17",
+            AnimeApi.RatingGetAnime.R to "R+",
+            AnimeApi.RatingGetAnime.RX to "Rx – Hentai"
         ),
         genreLabel = "Genre",
         genreCount = { n -> "$n genres" },
@@ -101,10 +107,12 @@ val EnStrings = Strings(
         scoreDescription = "Average score out of 10",
         rankDescription = "Rank by score",
         popularityDescription = "Rank by popularity",
+        membersDescription = "Number of members",
         studiosDescription = "Production studios",
         airedDescription = "Start airing date",
         statusDescription = "Airing status",
-        synopsisLabel = "Synopsis"
+        synopsisLabel = "Synopsis",
+        episodesLabel = "Episodes"
     ),
     episodeDetail = EpisodeDetailStrings(
         alternativeTitles = "Alternative titles",
@@ -115,7 +123,13 @@ val EnStrings = Strings(
         couldNotLoadStreams = "Could not load streams",
         noSource = "No source selected",
         dub = "DUB",
-        sub = "SUB"
+        sub = "SUB",
+        upNext = "Up next",
+        nextEpisode = "Next episode",
+        filler = "Filler",
+        recap = "Recap",
+        score = "Score",
+        episodeNumber = "Episode {number}"
     )
 )
 
