@@ -88,22 +88,16 @@ fun <T> SearchDropdown(
             onDismissRequest = {
                 expanded = false
                 onExpandedChange(false)
+            },
+            headerContent = {
+                BaseTextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    label = { Text(strings.ui.dropdown.search) },
+                    modifier = Modifier.border(0.dp, Color.Transparent).fillMaxWidth()
+                )
             }
         ) {
-            BaseTextField(
-                value = searchText,
-                onValueChange = { searchText = it },
-                label = { Text(strings.ui.dropdown.search) },
-                modifier = Modifier.border(0.dp, Color.Transparent).fillMaxWidth()
-            )
-
-            Spacer(
-                modifier = Modifier
-                    .height(1.dp)
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.outlineVariant)
-            )
-
             if (searchText.isNotEmpty() && filteredList.isEmpty() || items.isEmpty()) {
                 noItemsContent()
             } else {
@@ -130,11 +124,14 @@ fun <T> SearchDropdown(
 }
 
 @Composable
-internal fun ExposedDropdownMenuBoxScope.ExposedSearchableDropDownMenu(
+fun ExposedDropdownMenuBoxScope.ExposedSearchableDropDownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState(),
+    matchAnchorWidth: Boolean = true,
+    minWidth: Dp = Dp.Unspecified,
+    headerContent: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val expandedStates = remember { MutableTransitionState(false) }
@@ -156,7 +153,9 @@ internal fun ExposedDropdownMenuBoxScope.ExposedSearchableDropDownMenu(
                 expandedStates = expandedStates,
                 transformOriginState = transformOriginState,
                 scrollState = scrollState,
-                modifier = modifier.exposedDropdownSize(),
+                modifier = modifier.exposedDropdownSize(matchAnchorWidth),
+                minWidth = minWidth,
+                headerContent = headerContent,
                 content = content
             )
         }
@@ -294,6 +293,8 @@ internal fun DropdownMenuContent(
     transformOriginState: MutableState<TransformOrigin>,
     scrollState: ScrollState,
     modifier: Modifier = Modifier,
+    minWidth: Dp = Dp.Unspecified,
+    headerContent: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     // Menu open/close animation.
@@ -350,14 +351,32 @@ internal fun DropdownMenuContent(
             },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
     ) {
-        Column(
-            modifier =
-                modifier
-                    .padding(vertical = Spacing.sm)
+        BoxWithConstraints(modifier = modifier) {
+            val maxMenuHeight = (maxHeight - 96.dp).coerceAtLeast(0.dp)
+            Column(
+                modifier = Modifier
+                    .widthIn(min = minWidth)
                     .width(IntrinsicSize.Max)
-                    .appVerticalScrollbar(scrollState),
-            content = content
-        )
+                    .heightIn(max = maxMenuHeight)
+            ) {
+                if (headerContent != null) {
+                    headerContent()
+                    Spacer(
+                        modifier = Modifier
+                            .height(1.dp)
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.outlineVariant)
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .appVerticalScrollbar(scrollState)
+                        .padding(vertical = Spacing.sm),
+                    content = content
+                )
+            }
+        }
     }
 }
 

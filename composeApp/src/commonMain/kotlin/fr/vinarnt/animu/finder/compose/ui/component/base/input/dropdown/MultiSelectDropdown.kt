@@ -69,20 +69,15 @@ fun <T> MultiSelectDropdown(
             onDismissRequest = {
                 expanded = false
                 searchText = ""
+            },
+            headerContent = {
+                BaseTextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    label = { Text(strings.ui.dropdown.search) }
+                )
             }
         ) {
-            BaseTextField(
-                value = searchText,
-                onValueChange = { searchText = it },
-                label = { Text(strings.ui.dropdown.search) }
-            )
-            Spacer(
-                modifier = Modifier
-                    .height(1.dp)
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.outlineVariant)
-            )
-
             if (filteredOptions.isEmpty()) {
                 Text(
                     strings.ui.dropdown.noContent,

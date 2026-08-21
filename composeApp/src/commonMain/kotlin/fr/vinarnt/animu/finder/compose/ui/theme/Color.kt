@@ -72,3 +72,8 @@ val surfaceContainerLowDark = Color(0xFF191C20)
 val surfaceContainerDark = Color(0xFF1D2024)
 val surfaceContainerHighDark = Color(0xFF272A2F)
 val surfaceContainerHighestDark = Color(0xFF32353A)
+
+// Theme-independent semantic accents
+val scoreGold = Color(0xFFF2B24A)
+val watchedGreen = Color(0xFF4FC08D)
+val accentPink = Color(0xFFE0527D)
