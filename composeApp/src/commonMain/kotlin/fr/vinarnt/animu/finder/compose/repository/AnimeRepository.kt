@@ -12,7 +12,7 @@ class AnimeRepository(private val jikan: JikanClient) {
 
     suspend fun searchAnimes(
         page: Int = 1,
-        limit: Int = 25,
+        limit: Int = 50,
         query: String? = null,
         type: AnimeApi.TypeGetAnime? = null,
         status: AnimeApi.StatusGetAnime? = null,

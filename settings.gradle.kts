@@ -17,6 +17,7 @@ pluginManagement {
 
 dependencyResolutionManagement {
     repositories {
+        mavenCentral()
         maven { url = uri("https://jitpack.io") }
         maven { url = uri("https://jogamp.org/deployment/maven") }
         google {
@@ -26,7 +27,6 @@ dependencyResolutionManagement {
                 includeGroupAndSubgroups("com.google")
             }
         }
-        mavenCentral()
     }
 }
 

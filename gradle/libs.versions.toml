@@ -23,6 +23,7 @@ coil = "3.5.0"
 slf4j = "2.0.18"
 jikan4k = "1.0.3"
 lazy-pagination-compose = "1.7.3"
+ktor-persistent-cache = "1.2.0"
 material3Android = "1.4.0"
 compose-ui-tooling = "1.11.1"
 compose-multiplatform-media-player = "1.0.53"
@@ -60,6 +61,7 @@ coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" 
 coil-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 jikan4k = { module = "com.github.vinarnt.Jikan4k:jikan4k", version.ref = "jikan4k" }
 lazyPaginationCompose = { module = "io.github.ahmad-hamwi:lazy-pagination-compose", version.ref = "lazy-pagination-compose" }
+ktor-persistent-cache = { module = "io.github.santimattius:ktor-persistent-cache", version.ref = "ktor-persistent-cache" }
 composeUITooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose-ui-tooling" }
 compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "compose-multiplatform-media-player" }
 

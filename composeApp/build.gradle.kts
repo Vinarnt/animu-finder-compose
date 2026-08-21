@@ -64,9 +64,18 @@ kotlin {
     }
 
     sourceSets {
+        val commonMain by getting
         val desktopMain by getting
 
+        val nonJsMain by creating {
+            dependsOn(commonMain)
+            dependencies {
+                implementation(libs.ktor.persistent.cache)
+            }
+        }
+
         androidMain {
+            dependsOn(nonJsMain)
             dependencies {
                 implementation(compose.preview)
                 implementation(libs.androidx.activity.compose)
@@ -111,8 +120,10 @@ kotlin {
             implementation(libs.slf4j.simple)
             implementation(libs.ktor.client.java)
         }
+        desktopMain.dependsOn(nonJsMain)
 
         iosMain {
+            dependsOn(nonJsMain)
             dependencies {
                 implementation(libs.ktor.client.darwin)
             }

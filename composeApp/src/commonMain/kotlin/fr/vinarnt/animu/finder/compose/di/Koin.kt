@@ -7,6 +7,7 @@ import fr.vinarnt.animu.finder.compose.repository.extractor.StreamRepository
 import fr.vinarnt.animu.finder.compose.repository.extractor.StreamingExtractor
 import fr.vinarnt.animu.finder.compose.repository.extractor.VoirAnimeExtractor
 import fr.vinarnt.animu.finder.compose.repository.extractor.provideExtractorHttpClient
+import fr.vinarnt.animu.finder.compose.service.ContinueWatchingCache
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeDetailViewModel
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeListViewModel
 import fr.vinarnt.animu.finder.compose.viewmodel.EpisodeDetailViewModel
@@ -36,6 +37,7 @@ private val commonModule = module {
                         }
                         level = LogLevel.INFO
                     }
+                    configureJikanCache()
                 }
             }
         )
@@ -46,6 +48,7 @@ private val commonModule = module {
     viewModelOf(::EpisodeDetailViewModel)
 
     singleOf(::AnimeRepository)
+    singleOf(::ContinueWatchingCache)
 
     single { provideExtractorHttpClient() }
 

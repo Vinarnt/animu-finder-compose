@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import fr.vinarnt.animu.finder.compose.model.AnimeGenre
+import fr.vinarnt.animu.finder.compose.model.ContinueWatchingAnime
 import fr.vinarnt.animu.finder.compose.model.ContinueWatchingEntry
+import fr.vinarnt.animu.finder.compose.model.toContinueWatchingAnime
 import fr.vinarnt.animu.finder.compose.repository.AnimeRepository
+import fr.vinarnt.animu.finder.compose.service.ContinueWatchingCache
 import fr.vinarnt.animu.finder.compose.service.SettingManager
 import fr.vinarnt.jikan4k.apis.AnimeApi
 import fr.vinarnt.jikan4k.models.GetAnime200ResponseDataInner
-import fr.vinarnt.jikan4k.models.GetAnimeById200ResponseData
 import io.github.ahmad_hamwi.compose.pagination.PaginationState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,7 +25,7 @@ private const val MAX_RESUME = 8
 
 data class ContinueWatchingItem(
     val entry: ContinueWatchingEntry,
-    val anime: GetAnimeById200ResponseData?,
+    val anime: ContinueWatchingAnime?,
 )
 
 data class AnimeSearchFilters(
@@ -38,6 +40,7 @@ data class AnimeSearchFilters(
 class AnimeListViewModel(
     private val animeRepository: AnimeRepository,
     private val settingManager: SettingManager,
+    private val continueWatchingCache: ContinueWatchingCache,
 ) : ViewModel() {
 
     private val _filters = MutableStateFlow(AnimeSearchFilters())
@@ -56,14 +59,24 @@ class AnimeListViewModel(
     init {
         viewModelScope.launch {
             continueWatching.collect { entries ->
-                val items = entries.take(MAX_RESUME).map { ContinueWatchingItem(it, null) }
+                continueWatchingCache.prune(entries.map { it.animeId }.toSet())
+                val items = entries.take(MAX_RESUME).map {
+                    ContinueWatchingItem(it, continueWatchingCache.get(it.animeId))
+                }
                 _resumeItems.value = items
                 items.forEach { item ->
-                    viewModelScope.launch {
-                        val anime = runCatching { animeRepository.getAnimeById(item.entry.animeId) }.getOrNull()
-                        _resumeItems.update { list ->
-                            list.map {
-                                if (it.entry.animeId == item.entry.animeId) it.copy(anime = anime) else it
+                    if (item.anime == null) {
+                        viewModelScope.launch {
+                            val anime = runCatching { animeRepository.getAnimeById(item.entry.animeId) }
+                                .getOrNull()
+                                ?.toContinueWatchingAnime()
+                            if (anime != null) {
+                                continueWatchingCache.put(item.entry.animeId, anime)
+                            }
+                            _resumeItems.update { list ->
+                                list.map {
+                                    if (it.entry.animeId == item.entry.animeId) it.copy(anime = anime) else it
+                                }
                             }
                         }
                     }

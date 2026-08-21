@@ -22,7 +22,6 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.navigation.screen.anime.detail.EpisodeDetailScreen
-import fr.vinarnt.animu.finder.compose.ui.component.anime.detail.resolveAnimeTitle
 import fr.vinarnt.animu.finder.compose.ui.component.card.AnimeCard
 import fr.vinarnt.animu.finder.compose.ui.theme.CornerRadius
 import fr.vinarnt.animu.finder.compose.ui.theme.Elevation
@@ -74,17 +73,16 @@ fun ContinueWatchingRow(
                     AnimeCard(
                         modifier = Modifier.width(CardWidth),
                         malId = anime.malId ?: item.entry.animeId,
-                        title = resolveAnimeTitle(anime),
-                        thumbnailUrl = anime.images?.webp?.largeImageUrl
-                            ?: anime.images?.jpg?.largeImageUrl ?: "",
+                        title = anime.title,
+                        thumbnailUrl = anime.posterUrl ?: "",
                         badgeText = "EP ${item.entry.episodeNumber}",
                         onClick = {
                             navigator.push(
                                 EpisodeDetailScreen(
                                     animeId = item.entry.animeId,
                                     episodeNumber = item.entry.episodeNumber,
-                                    animeTitle = resolveAnimeTitle(anime),
-                                    altTitles = anime.titles?.mapNotNull { it.title }.orEmpty(),
+                                    animeTitle = anime.title,
+                                    altTitles = anime.altTitles,
                                     totalEpisodes = anime.episodes,
                                 )
                             )
