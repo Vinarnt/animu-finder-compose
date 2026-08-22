@@ -59,63 +59,70 @@ fun EpisodeDetailLayout(
             EpisodeHeader(episode, episodeNumber)
         }
 
-        item(key = "player") {
-            when {
-                // The player is composed in the floating fullscreen overlay instead.
-                isFullscreen -> Unit
-                selectedStream != null && playerContent != null -> {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sm),
-                        shape = RoundedCornerShape(CornerRadius.md),
-                        color = Color.Black,
-                        tonalElevation = Elevation.sm,
-                    ) {
-                        playerContent()
-                    }
-                }
-                else -> {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = strings.episodeDetail.noSource,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                    }
-                }
-            }
-        }
-
-        item(key = "sources") {
+        item(key = "player+sources") {
             BoxWithConstraints(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sm),
             ) {
+                val playerSection: @Composable () -> Unit = {
+                    when {
+                        // The player is composed in the floating fullscreen overlay instead.
+                        isFullscreen -> Unit
+                        selectedStream != null && playerContent != null -> {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(CornerRadius.md),
+                                color = Color.Black,
+                                tonalElevation = Elevation.sm,
+                            ) {
+                                playerContent()
+                            }
+                        }
+                        else -> {
+                            Box(
+                                modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = strings.episodeDetail.noSource,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+                        }
+                    }
+                }
+
                 if (maxWidth >= 800.dp) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                         verticalAlignment = Alignment.Top,
                     ) {
-                        StreamSourceList(
-                            streams = streams,
-                            selectedStream = selectedStream,
-                            loading = loadingStreams,
-                            onSelect = onSelectStream,
-                            modifier = Modifier.weight(1f),
-                        )
-                        UpNextCard(
-                            nextEpisodeNumber = episodeNumber + 1,
-                            onClick = onPlayNext,
-                            modifier = Modifier.width(280.dp),
-                        )
+                        Box(modifier = Modifier.weight(1f)) {
+                            playerSection()
+                        }
+                        Column(
+                            modifier = Modifier.width(320.dp),
+                            verticalArrangement = Arrangement.spacedBy(Spacing.sm),
+                        ) {
+                            StreamSourceList(
+                                streams = streams,
+                                selectedStream = selectedStream,
+                                loading = loadingStreams,
+                                onSelect = onSelectStream,
+                            )
+                            UpNextCard(
+                                nextEpisodeNumber = episodeNumber + 1,
+                                onClick = onPlayNext,
+                            )
+                        }
                     }
                 } else {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                     ) {
+                        playerSection()
                         StreamSourceList(
                             streams = streams,
                             selectedStream = selectedStream,
