@@ -39,15 +39,15 @@ import org.koin.compose.koinInject
 
 /**
  * Renders soft subtitles (WebVTT) fetched from [SubtitleTrack.url] as a timed,
- * draggable overlay. The player library's JVM backend ignores subtitle tracks, so
- * soft subs are loaded and drawn here instead. Hard subs are burned into the video
- * and need no overlay.
+ * draggable overlay. These are external subtitle files rather than tracks embedded
+ * in the media, so they are loaded and drawn here instead of by the player. Hard
+ * subs are burned into the video and need no overlay.
  *
  * This composable renders inside the player's interaction overlay (the padded
  * tap-to-pause layer), so the subtitle text is a child of that overlay's gesture
  * node: taps on the text fall through to the pause/fullscreen gesture, and only
  * real drags are consumed by the text. The text is clamped so it stays over the
- * video surface, never overlapping the control bar or side menus, and its position
+ * video surface, never overlapping the control bar, and its position
  * is stored as fractions of the player size (see [SubtitlePosition]) so it stays
  * put across resizes/fullscreen.
  */
@@ -82,16 +82,15 @@ fun SubtitleOverlay(
     }
 
     val density = LocalDensity.current
-    val sideMenuStripWidthPx = with(density) { SideMenuStripWidth.toPx() }
     val controlBarHeightPx = with(density) { ControlBarHeight.toPx() }
 
     // This fills the interaction overlay (the padded video area). Position fractions
-    // are relative to the FULL player, so the full dimensions are recovered by adding
-    // back the reserved strips.
+    // are relative to the FULL player, so the full height is recovered by adding back
+    // the reserved control-bar strip.
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val videoAreaW = constraints.maxWidth.toFloat()
         val videoAreaH = constraints.maxHeight.toFloat()
-        val playerW = videoAreaW + sideMenuStripWidthPx
+        val playerW = videoAreaW
         val playerH = videoAreaH + controlBarHeightPx
 
         if (activeCue != null) {

@@ -41,7 +41,7 @@ There are no tests in this project.
 
 **Images:** Coil 3 with Ktor3 network engine. Use `AsyncImage` from `coil3.compose`.
 
-**Video playback:** `compose-multiplatform-media-player`. `VideoPlayer` composable + `PlayerFullscreenEffect` (expect/actual per platform).
+**Video playback:** MediaMP (`mediamp-all`, ExoPlayer/MPV/AVKit/HTMLVideo backends). The desktop (MPV) backend needs its native runtime on the classpath: `runtimeOnly(libs.mediamp.mpv.runtime)` is wired in `desktopMain` — without it the player fails at startup with "mpv native runtime not found". `StreamingVideoPlayer` composable renders the `MediampPlayerSurface` + a hand-built `PlayerControlBar`; `PlayerFullscreenEffect` (expect/actual per platform) handles native window fullscreen.
 
 **Logging:** Kermit. Initialize per platform (e.g. `initKermitLogging()` in desktop `main.kt`); `KermitKoinLogger` bridges Koin logging to Kermit.
 
@@ -73,7 +73,7 @@ object Elevation { sm, md, lg }
 | Coil | 3.5.0 |
 | lazy-pagination-compose | 1.7.3 |
 | Lyricist | 1.9.0 |
-| compose-multiplatform-media-player | 1.0.53 |
+| mediamp | 0.3.0 |
 | Kermit | 2.1.0 |
 
 ## Opt-in Annotations

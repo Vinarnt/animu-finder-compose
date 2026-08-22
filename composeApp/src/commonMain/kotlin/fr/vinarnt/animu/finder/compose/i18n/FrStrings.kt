@@ -144,5 +144,14 @@ val FrStrings = Strings(
         recap = "Récapitulatif",
         score = "Score",
         episodeNumber = "Épisode {number}"
+    ),
+    player = PlayerStrings(
+        play = "Lecture",
+        pause = "Pause",
+        fullscreen = "Plein écran",
+        exitFullscreen = "Quitter le plein écran",
+        speed = "Vitesse de lecture",
+        audio = "Piste audio",
+        error = "Erreur de lecture"
     )
 )

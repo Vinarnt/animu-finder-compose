@@ -111,7 +111,7 @@ kotlin {
                 implementation(libs.bundles.coil)
                 implementation(libs.jikan4k)
                 implementation(libs.lazyPaginationCompose)
-                implementation(libs.compose.multiplatform.media.player)
+                implementation(libs.mediamp.all)
             }
         }
         desktopMain.dependencies {
@@ -119,6 +119,9 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.slf4j.simple)
             implementation(libs.ktor.client.java)
+            // The MPV backend is bundled by mediamp-all but its native runtime (libmpv +
+            // FFmpeg) ships separately; without it the player fails to start on desktop.
+            runtimeOnly(libs.mediamp.mpv.runtime)
         }
         desktopMain.dependsOn(nonJsMain)
 

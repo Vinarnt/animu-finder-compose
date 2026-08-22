@@ -26,7 +26,7 @@ lazy-pagination-compose = "1.7.3"
 ktor-persistent-cache = "1.2.0"
 material3Android = "1.4.0"
 compose-ui-tooling = "1.11.1"
-compose-multiplatform-media-player = "1.0.53"
+mediamp = "0.3.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -63,7 +63,8 @@ jikan4k = { module = "com.github.vinarnt.Jikan4k:jikan4k", version.ref = "jikan4
 lazyPaginationCompose = { module = "io.github.ahmad-hamwi:lazy-pagination-compose", version.ref = "lazy-pagination-compose" }
 ktor-persistent-cache = { module = "io.github.santimattius:ktor-persistent-cache", version.ref = "ktor-persistent-cache" }
 composeUITooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose-ui-tooling" }
-compose-multiplatform-media-player = { module = "network.chaintech:compose-multiplatform-media-player", version.ref = "compose-multiplatform-media-player" }
+mediamp-all = { module = "org.openani.mediamp:mediamp-all", version.ref = "mediamp" }
+mediamp-mpv-runtime = { module = "org.openani.mediamp:mediamp-mpv-runtime", version.ref = "mediamp" }
 
 
 # Used only for desktop hot reload

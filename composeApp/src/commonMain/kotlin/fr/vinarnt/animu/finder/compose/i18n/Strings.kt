@@ -12,6 +12,7 @@ data class Strings(
     val animeList: AnimeListStrings,
     val animeDetail: AnimeDetailStrings,
     val episodeDetail: EpisodeDetailStrings,
+    val player: PlayerStrings,
 )
 
 data class NavigationStrings(
@@ -94,6 +95,16 @@ data class EpisodeDetailStrings(
     val recap: String,
     val score: String,
     val episodeNumber: String
+)
+
+data class PlayerStrings(
+    val play: String,
+    val pause: String,
+    val fullscreen: String,
+    val exitFullscreen: String,
+    val speed: String,
+    val audio: String,
+    val error: String
 )
 
 data class AnimeListStrings(

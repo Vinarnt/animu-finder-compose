@@ -131,6 +131,15 @@ val EnStrings = Strings(
         recap = "Recap",
         score = "Score",
         episodeNumber = "Episode {number}"
+    ),
+    player = PlayerStrings(
+        play = "Play",
+        pause = "Pause",
+        fullscreen = "Enter fullscreen",
+        exitFullscreen = "Exit fullscreen",
+        speed = "Playback speed",
+        audio = "Audio track",
+        error = "Playback error"
     )
 )
 
