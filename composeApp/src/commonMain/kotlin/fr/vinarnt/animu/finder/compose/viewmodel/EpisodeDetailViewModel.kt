@@ -31,7 +31,11 @@ class EpisodeDetailViewModel(
     private val _loadingStreams = MutableStateFlow(false)
     val loadingStreams: StateFlow<Boolean> = _loadingStreams.asStateFlow()
 
+    private val _nextEpisode = MutableStateFlow<GetAnimeByIdEpisodesByEpisodeId200ResponseData?>(null)
+    val nextEpisode: StateFlow<GetAnimeByIdEpisodesByEpisodeId200ResponseData?> = _nextEpisode.asStateFlow()
+
     private var episodeLoadGeneration = 0
+    private var nextEpisodeLoadGeneration = 0
     private var streamLoadGeneration = 0
 
     fun loadEpisode(animeId: Int, episodeNumber: Int) {
@@ -44,6 +48,20 @@ class EpisodeDetailViewModel(
                 _episode.value = result
             } catch (e: Exception) {
                 Logger.w("Failed to load episode: ${e.message}", e)
+            }
+        }
+    }
+
+    fun loadNextEpisode(animeId: Int, episodeNumber: Int) {
+        val generation = ++nextEpisodeLoadGeneration
+        _nextEpisode.value = null
+        viewModelScope.launch {
+            try {
+                val result = animeRepository.getAnimeEpisodeById(animeId, episodeNumber)
+                if (generation != nextEpisodeLoadGeneration) return@launch
+                _nextEpisode.value = result
+            } catch (e: Exception) {
+                Logger.w("Failed to load next episode: ${e.message}", e)
             }
         }
     }

@@ -55,6 +55,7 @@ class EpisodeDetailScreen(
         val streams by vm.streams.collectAsStateWithLifecycle()
         val selectedStream by vm.selectedStream.collectAsStateWithLifecycle()
         val loadingStreams by vm.loadingStreams.collectAsStateWithLifecycle()
+        val nextEpisode by vm.nextEpisode.collectAsStateWithLifecycle()
 
         var isFullscreen by remember { mutableStateOf(false) }
         val stream = selectedStream
@@ -71,6 +72,7 @@ class EpisodeDetailScreen(
 
         LaunchedEffect(animeId, episodeNumber) {
             vm.loadEpisode(animeId, episodeNumber)
+            vm.loadNextEpisode(animeId, episodeNumber + 1)
             vm.loadStreams(
                 EpisodeSearchQuery(
                     animeTitle = animeTitle,
@@ -100,6 +102,7 @@ class EpisodeDetailScreen(
                     streams = streams,
                     selectedStream = selectedStream,
                     loadingStreams = loadingStreams,
+                    nextEpisode = nextEpisode,
                     onSelectStream = vm::selectStream,
                     isFullscreen = isFullscreen,
                     playerContent = {

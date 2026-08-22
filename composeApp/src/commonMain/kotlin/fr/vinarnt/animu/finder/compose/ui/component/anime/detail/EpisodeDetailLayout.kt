@@ -36,6 +36,7 @@ fun EpisodeDetailLayout(
     streams: List<StreamSource>,
     selectedStream: StreamSource?,
     loadingStreams: Boolean,
+    nextEpisode: GetAnimeByIdEpisodesByEpisodeId200ResponseData? = null,
     onSelectStream: (StreamSource) -> Unit,
     modifier: Modifier = Modifier,
     isFullscreen: Boolean = false,
@@ -105,15 +106,16 @@ fun EpisodeDetailLayout(
                             modifier = Modifier.width(320.dp),
                             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                         ) {
+                            UpNextCard(
+                                nextEpisode = nextEpisode,
+                                nextEpisodeNumber = episodeNumber + 1,
+                                onClick = onPlayNext,
+                            )
                             StreamSourceList(
                                 streams = streams,
                                 selectedStream = selectedStream,
                                 loading = loadingStreams,
                                 onSelect = onSelectStream,
-                            )
-                            UpNextCard(
-                                nextEpisodeNumber = episodeNumber + 1,
-                                onClick = onPlayNext,
                             )
                         }
                     }
@@ -123,15 +125,16 @@ fun EpisodeDetailLayout(
                         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
                     ) {
                         playerSection()
+                        UpNextCard(
+                            nextEpisode = nextEpisode,
+                            nextEpisodeNumber = episodeNumber + 1,
+                            onClick = onPlayNext,
+                        )
                         StreamSourceList(
                             streams = streams,
                             selectedStream = selectedStream,
                             loading = loadingStreams,
                             onSelect = onSelectStream,
-                        )
-                        UpNextCard(
-                            nextEpisodeNumber = episodeNumber + 1,
-                            onClick = onPlayNext,
                         )
                     }
                 }
