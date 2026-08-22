@@ -93,7 +93,7 @@ class AnimeYaProvider(http: ProviderHttpClient) : BaseProvider(http) {
             val type = str(obj, "type")
 
             val isM3U8 = playerUrl.contains(".m3u8") || type.equals("hls", ignoreCase = true)
-            val streamUrl = if (isM3U8) playerUrl else resolveHls(playerUrl)
+            val streamUrl = if (isM3U8 || isDirectMediaUrl(playerUrl)) playerUrl else resolveHls(playerUrl)
             if (streamUrl == null) {
                 Logger.d("AnimeYa: could not resolve embed player $playerUrl (type=$type, langue=$langue, subType=$subType)")
                 continue
@@ -101,13 +101,16 @@ class AnimeYaProvider(http: ProviderHttpClient) : BaseProvider(http) {
             Logger.i("AnimeYa: resolved player -> $streamUrl (type=$type, langue=$langue, subType=$subType)")
 
             val playerSubtitles = collectSubtitles(obj)
+            // CDNs like mp4upload require a Referer from their own origin (animeya.cc is
+            // rejected with 403), so derive it from the resolved stream URL.
+            val referer = Regex("""^https?://[^/]+""").find(streamUrl)?.value?.plus("/") ?: "$base/"
             streams.add(
                 StreamSource(
                     providerId = providerId,
                     url = streamUrl,
                     quality = quality,
                     isM3U8 = streamUrl.contains(".m3u8"),
-                    headers = mapOf("Referer" to "$base/"),
+                    headers = mapOf("Referer" to referer),
                     dub = dubCodeFor(langue, subType),
                     subtitles = (subtitles + playerSubtitles).distinctBy { it.url },
                     matchScore = 1f,
@@ -159,41 +162,82 @@ class AnimeYaProvider(http: ProviderHttpClient) : BaseProvider(http) {
     }
 
     private fun extractEpisodes(html: String): List<Pair<String, Int>> {
-        val episodeLists = mutableListOf<JsonArray>()
+        // Each episode is pushed as its own RSC chunk shaped like
+        // `{"json":{...,"id":337,"episodeNumber":23,...}}`, so look for any object
+        // carrying both `id` and `episodeNumber` rather than a single `eps` array.
+        val episodes = LinkedHashMap<String, Int>()
         for (obj in parseRscStream(html)) {
             deepSearch(obj, predicate = { el ->
-                el is JsonArray && el.isNotEmpty() &&
-                    (el.firstOrNull() as? JsonObject)?.get("episodeNumber") is JsonPrimitive
-            }).forEach { el -> episodeLists.add(el as JsonArray) }
+                el is JsonObject &&
+                    (el["episodeNumber"] as? JsonPrimitive)?.contentOrNull?.toIntOrNull() != null &&
+                    (el["id"] as? JsonPrimitive)?.contentOrNull != null
+            }).forEach { el ->
+                val episode = el as JsonObject
+                val id = (episode["id"] as JsonPrimitive).content
+                val number = (episode["episodeNumber"] as JsonPrimitive).content.toInt()
+                episodes[id] = number
+            }
         }
-        if (episodeLists.isEmpty()) return emptyList()
-
-        episodeLists.sortByDescending { it.size }
-        return episodeLists.first().mapNotNull { el ->
-            val obj = el as? JsonObject ?: return@mapNotNull null
-            val id = str(obj, "id") ?: return@mapNotNull null
-            val number = (obj["episodeNumber"] as? JsonPrimitive)?.contentOrNull?.toIntOrNull()
-                ?: return@mapNotNull null
-            id to number
-        }
+        return episodes.toList()
     }
 
     private fun parseRscStream(html: String): List<JsonElement> {
         val results = mutableListOf<JsonElement>()
-        val regex = Regex("""self\.__next_f\.push\(\[(\d+|0),"((?:[^"\\]|\\.)*)"\]\)""")
-        for (match in regex.findAll(html)) {
-            var raw = match.groupValues[2]
+        // Walk the inline RSC chunks manually. A regex like
+        // `self.__next_f\.push\(\[(\d+|0),"((?:[^"\\]|\\.)*)"\]\)` recurses once per
+        // character matched by the `*` loop, which overflows the stack (StackOverflowError)
+        // on large pages (Next.js pushes big payloads in a single chunk).
+        val marker = "self.__next_f.push(["
+        var index = 0
+        while (true) {
+            val start = html.indexOf(marker, index)
+            if (start == -1) break
+            var i = start + marker.length
+            // Numeric chunk id: `(\d+|0)`.
+            while (i < html.length && html[i] in '0'..'9') i++
+            if (i >= html.length || html[i] != ',') {
+                index = start + marker.length
+                continue
+            }
+            i++ // skip ','
+            if (i >= html.length || html[i] != '"') {
+                index = start + marker.length
+                continue
+            }
+            i++ // skip opening '"'
+            // Read the JSON-encoded string content verbatim, preserving backslash
+            // escapes, up to the first unescaped '"'.
+            val content = StringBuilder()
+            while (i < html.length) {
+                val c = html[i]
+                if (c == '"') {
+                    i++
+                    break
+                }
+                content.append(c)
+                if (c == '\\' && i + 1 < html.length) {
+                    content.append(html[i + 1])
+                    i++
+                }
+                i++
+            }
+
+            var raw = content.toString()
             raw = runCatching {
                 json.parseToJsonElement("\"$raw\"").jsonPrimitive.content
             }.getOrElse {
                 raw.replace("\\\"", "\"").replace("\\n", "\n").replace("\\\\", "\\")
             }
             val idx = raw.indexOf(':')
-            if (idx == -1) continue
+            if (idx == -1) {
+                index = i
+                continue
+            }
             val value = raw.substring(idx + 1).trim()
             if (value.startsWith("[") || value.startsWith("{")) {
                 runCatching { results.add(json.parseToJsonElement(value)) }
             }
+            index = i
         }
         return results
     }
@@ -246,36 +290,57 @@ class AnimeYaProvider(http: ProviderHttpClient) : BaseProvider(http) {
         return result
     }
 
+    private fun isDirectMediaUrl(url: String): Boolean =
+        Regex("""\.(m3u8|mp4|webm|mkv|m4v|mov|mp3|aac|flac|ogg|mpd)(?:[?#].*)?$""").containsMatchIn(url)
+
+    // Many embed hosts HTML/unicode-escape quotes (`\u0022`, `&quot;`, ...). Without
+    // decoding them, URL-matching character classes span the whole page and produce
+    // garbage "streams" (and sometimes huge matches), so decode before matching.
+    private fun String.decodeEmbedEntities(): String =
+        replace("\\u0026", "&")
+            .replace("\\u0022", "\"")
+            .replace("\\u0027", "'")
+            .replace("&quot;", "\"")
+            .replace("&#39;", "'")
+            .replace("&amp;", "&")
+            .replace("\\/", "/")
+
     private suspend fun resolveHls(pageUrl: String): String? {
         Logger.d("AnimeYa: resolving HLS from embed $pageUrl")
         val html = try {
-            http.getText(pageUrl, headers())
+            http.getText(pageUrl, headers()).decodeEmbedEntities()
         } catch (e: Exception) {
             Logger.w("AnimeYa: embed fetch failed for $pageUrl: ${e.message}")
             return null
         }
         Regex("""https?://[^\s"'<>]+\.m3u8[^\s"'<>]*""").find(html)?.let {
-            return it.value.replace("\\/", "/")
+            return it.value
         }
+        // Some hosts (e.g. mp4upload) expose the direct file in a player config:
+        // `player.src({ type: "video/mp4", src: "https://...video.mp4" })`.
+        Regex("""(?:src|file)\s*[:=]\s*["'](https?://[^"']+\.(?:m3u8|mp4|webm|mkv)(?:[?#][^"']*)?)["']""")
+            .find(html)?.let { return it.groupValues[1] }
 
         val candidates = Regex("""(?:iframe|source)[^>]+src=["']([^"']+)["']""")
             .findAll(html)
-            .map { it.groupValues[1].replace("\\/", "/") }
+            .map { it.groupValues[1] }
             .filter { it.startsWith("http") }
             .distinct()
             .take(6)
             .toList()
 
-        Logger.d("AnimeYa: no direct m3u8 in embed, probing ${candidates.size} candidate(s)")
+        Logger.d("AnimeYa: no direct media in embed, probing ${candidates.size} candidate(s)")
         for (candidate in candidates) {
             val page = try {
-                http.getText(candidate, headers())
+                http.getText(candidate, headers()).decodeEmbedEntities()
             } catch (e: Exception) {
                 continue
             }
             Regex("""https?://[^\s"'<>]+\.m3u8[^\s"'<>]*""").find(page)?.let {
-                return it.value.replace("\\/", "/")
+                return it.value
             }
+            Regex("""(?:src|file)\s*[:=]\s*["'](https?://[^"']+\.(?:m3u8|mp4|webm|mkv)(?:[?#][^"']*)?)["']""")
+                .find(page)?.let { return it.groupValues[1] }
         }
         Logger.w("AnimeYa: could not extract m3u8 from embed $pageUrl")
         return null
