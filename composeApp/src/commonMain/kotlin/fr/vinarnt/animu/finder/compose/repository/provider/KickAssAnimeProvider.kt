@@ -24,6 +24,7 @@ class KickAssAnimeProvider(http: ProviderHttpClient) : BaseProvider(http) {
 
     private val base = "https://kaa.lt"
     private val cdnReferer = "https://krussdomi.com/"
+    private val cdnOrigin = "https://krussdomi.com"
     private val manifestBase = "https://hls.krussdomi.com/manifest"
     private val subLang = "ja-JP"
     private val dubLang = "en-US"
@@ -179,7 +180,13 @@ class KickAssAnimeProvider(http: ProviderHttpClient) : BaseProvider(http) {
                     url = manifest,
                     quality = "auto",
                     isM3U8 = true,
-                    headers = mapOf("Referer" to cdnReferer),
+                    headers = mapOf(
+                        "Referer" to cdnReferer,
+                        // The .jpg HLS segments are served from rotating st1.*.xyz CDN
+                        // hosts that reject requests without a matching Origin header
+                        // (403); the Referer alone is not enough.
+                        "Origin" to cdnOrigin,
+                    ),
                     dub = if (isDub) "en" else null,
                     subtitles = subtitles,
                     matchScore = 1f,
