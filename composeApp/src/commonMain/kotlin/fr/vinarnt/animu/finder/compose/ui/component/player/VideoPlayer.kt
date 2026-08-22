@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -38,7 +39,14 @@ import chaintech.videoplayer.ui.video.VideoPlayerComposable
 import fr.vinarnt.animu.finder.compose.model.StreamSource
 import kotlinx.coroutines.delay
 
-private val ControlBarHeight = 104.dp
+internal val ControlBarHeight = 104.dp
+
+// The library's selection menus (quality/speed/audio/subtitles) slide in from the
+// right edge, keeping a ~35dp margin around their buttons. The tap overlay below
+// reserves this strip so those menus keep receiving their own taps instead of the
+// overlay toggling play/pause.
+internal val SideMenuStripWidth = 200.dp
+
 private const val SeekStepSeconds = 10f
 
 /**
@@ -50,8 +58,7 @@ internal fun MediaPlayerHost.handlePlayerKey(
     currentTime: Float,
     totalTime: Float,
 ): Boolean {
-    if (event.type != KeyEventType.KeyDown) return false
-    return when (event.key) {
+    return event.type == KeyEventType.KeyDown && when (event.key) {
         Key.Spacebar -> {
             togglePlayPause()
             true
@@ -75,104 +82,125 @@ fun StreamingVideoPlayer(
     isFullscreen: Boolean = false,
     onFullscreenChange: (Boolean) -> Unit = {},
 ) {
-    val playerHost = remember(source.url) {
-        MediaPlayerHost(
-            mediaUrl = source.url,
-            autoPlay = false,
-            headers = source.headers.ifEmpty { null },
-        )
-    }
+    // Key the whole player subtree on the media URL: the underlying platform
+    // player (VLC) keeps its event listener bound to the first MediaPlayerHost
+    // it sees, so switching sources without recreating it leaves the new host
+    // without duration updates (no seek bar). Recreating the subtree per URL
+    // pairs each host with its own player instance.
+    key(source.url) {
+        val playerHost = remember {
+            MediaPlayerHost(
+                mediaUrl = source.url,
+                autoPlay = false,
+                headers = source.headers.ifEmpty { null },
+            )
+        }
 
-    val currentOnFullscreenChange by rememberUpdatedState(onFullscreenChange)
+        val currentOnFullscreenChange by rememberUpdatedState(onFullscreenChange)
 
-    var currentTime by remember { mutableStateOf(0f) }
-    var totalTime by remember { mutableStateOf(0f) }
+        var currentTime by remember { mutableStateOf(0f) }
+        var totalTime by remember { mutableStateOf(0f) }
 
-    LaunchedEffect(playerHost) {
-        playerHost.onEvent = { event ->
-            when (event) {
-                is MediaPlayerEvent.FullScreenChange -> currentOnFullscreenChange(event.isFullScreen)
-                is MediaPlayerEvent.CurrentTimeChange -> currentTime = event.currentTime
-                is MediaPlayerEvent.TotalTimeChange -> totalTime = event.totalTime
-                else -> Unit
+        LaunchedEffect(playerHost) {
+            playerHost.onEvent = { event ->
+                when (event) {
+                    is MediaPlayerEvent.FullScreenChange -> currentOnFullscreenChange(event.isFullScreen)
+                    is MediaPlayerEvent.CurrentTimeChange -> currentTime = event.currentTime
+                    is MediaPlayerEvent.TotalTimeChange -> totalTime = event.totalTime
+                    else -> Unit
+                }
             }
         }
-    }
 
-    // Keep the host's fullscreen flag in sync with the hoisted fullscreen state,
-    // so exiting fullscreen by another path (e.g. ESC) also resets the player icon.
-    LaunchedEffect(isFullscreen) {
-        playerHost.setFullScreen(isFullscreen)
-    }
-
-    val colors = MaterialTheme.colorScheme
-    val interaction = remember { MutableInteractionSource() }
-    val hovered by interaction.collectIsHoveredAsState()
-
-    // Controls are only shown while hovering, and hide shortly after the mouse
-    // leaves the player. The library's click handler never shows/hides them.
-    var controlsVisible by remember { mutableStateOf(false) }
-
-    LaunchedEffect(hovered) {
-        if (hovered) {
-            controlsVisible = true
-        } else {
-            delay(800)
-            controlsVisible = false
+        // Keep the host's fullscreen flag in sync with the hoisted fullscreen state,
+        // so exiting fullscreen by another path (e.g. ESC) also resets the player icon.
+        LaunchedEffect(isFullscreen) {
+            playerHost.setFullScreen(isFullscreen)
         }
-    }
 
-    val focusRequester = remember { FocusRequester() }
+        val colors = MaterialTheme.colorScheme
+        val interaction = remember { MutableInteractionSource() }
+        val hovered by interaction.collectIsHoveredAsState()
 
-    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+        // Controls are only shown while hovering, and hide shortly after the mouse
+        // leaves the player. The library's click handler never shows/hides them.
+        var controlsVisible by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(16f / 9f)
-            .background(Color.Black)
-            .hoverable(interaction)
-            .focusRequester(focusRequester)
-            .focusable()
-            .onPreviewKeyEvent { event ->
-                playerHost.handlePlayerKey(event, currentTime, totalTime)
-            },
-    ) {
-        VideoPlayerComposable(
-            modifier = Modifier.fillMaxSize(),
-            playerHost = playerHost,
-            playerConfig = VideoPlayerConfig(
-                // Visibility is driven by the hover override below; the library
-                // must not auto-hide on its own, and clicks must not toggle it.
-                isAutoHideControlEnabled = false,
-                showControlsOverride = controlsVisible,
-                // Fire control actions immediately: the library delays every
-                // button click by controlClickAnimationDuration (default 300ms)
-                // and drops clicks landing during that window.
-                controlClickAnimationDuration = 0,
-                seekBarThumbColor = colors.primary,
-                seekBarActiveTrackColor = colors.primary,
-                seekBarInactiveTrackColor = colors.surfaceVariant,
-                durationTextColor = colors.onSurface,
-                iconsTintColor = colors.onSurface,
-                loadingIndicatorColor = colors.primary,
-            ),
-        )
+        LaunchedEffect(hovered) {
+            if (hovered) {
+                controlsVisible = true
+            } else {
+                delay(800)
+                controlsVisible = false
+            }
+        }
 
-        // Transparent overlay over the video area (the bottom strip is left for
-        // the built-in control bar): single tap toggles play/pause, double tap
-        // toggles fullscreen. Consuming these events also keeps the library's own
-        // click-to-toggle-controls from firing over the video area.
+        val focusRequester = remember { FocusRequester() }
+
+        LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = ControlBarHeight)
-                .pointerInput(playerHost) {
-                    detectTapGestures(
-                        onTap = { playerHost.togglePlayPause() },
-                        onDoubleTap = { playerHost.toggleFullScreen() },
-                    )
-                }
-        )
+            modifier = modifier
+                .fillMaxWidth()
+                .aspectRatio(16f / 9f)
+                .background(Color.Black)
+                .hoverable(interaction)
+                .focusRequester(focusRequester)
+                .focusable()
+                .onPreviewKeyEvent { event ->
+                    playerHost.handlePlayerKey(event, currentTime, totalTime)
+                },
+        ) {
+            VideoPlayerComposable(
+                modifier = Modifier.fillMaxSize(),
+                playerHost = playerHost,
+                playerConfig = VideoPlayerConfig(
+                    // Visibility is driven by the hover override below; the library
+                    // must not auto-hide on its own, and clicks must not toggle it.
+                    isAutoHideControlEnabled = false,
+                    showControlsOverride = controlsVisible,
+                    // Some providers deliver single-audio streams (e.g. AniNeko
+                    // packer HLS served as ".txt") where the library's audio-track
+                    // detection surfaces spurious duplicates. They opt out per stream
+                    // via StreamSource.supportsAudioTrackSelection, so the selector is
+                    // hidden only when the stream actually benefits from it.
+                    showAudioTracksOptions = source.supportsAudioTrackSelection,
+                    // Fire control actions immediately: the library delays every
+                    // button click by controlClickAnimationDuration (default 300ms)
+                    // and drops clicks landing during that window.
+                    controlClickAnimationDuration = 0,
+                    seekBarThumbColor = colors.primary,
+                    seekBarActiveTrackColor = colors.primary,
+                    seekBarInactiveTrackColor = colors.surfaceVariant,
+                    durationTextColor = colors.onSurface,
+                    iconsTintColor = colors.onSurface,
+                    loadingIndicatorColor = colors.primary,
+                ),
+            )
+
+            // Interaction overlay over the video area. The bottom strip is left for the
+            // built-in control bar, and the right strip for the library's side
+            // selection menus, so both stay fully interactible. A tap toggles
+            // play/pause, a double tap toggles fullscreen. The subtitle overlay
+            // renders as a child of this box, so taps on the subtitle text fall
+            // through to this gesture while drags on it move the subtitle.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = ControlBarHeight, end = SideMenuStripWidth)
+                    .pointerInput(playerHost) {
+                        detectTapGestures(
+                            onTap = { playerHost.togglePlayPause() },
+                            onDoubleTap = { playerHost.toggleFullScreen() },
+                        )
+                    },
+            ) {
+                SubtitleOverlay(
+                    subtitles = source.subtitles,
+                    currentTime = currentTime,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
     }
 }

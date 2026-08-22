@@ -5,6 +5,7 @@ import cafe.adriel.lyricist.LanguageTag
 import com.russhwolf.settings.coroutines.FlowSettings
 import fr.vinarnt.animu.finder.compose.model.ContinueWatchingEntry
 import fr.vinarnt.animu.finder.compose.model.EpisodeDisplay
+import fr.vinarnt.animu.finder.compose.model.SubtitlePosition
 import fr.vinarnt.animu.finder.compose.ui.theme.Theme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -44,6 +45,12 @@ class SettingManager(val settings: FlowSettings) {
 
     suspend fun setEpisodeDisplay(display: EpisodeDisplay) = settings.putString("episodeDisplay", display.name)
 
+    suspend fun getSubtitlePosition(): SubtitlePosition =
+        decodeSubtitlePosition(settings.getStringFlow("subtitlePosition", "{}").first())
+
+    suspend fun setSubtitlePosition(position: SubtitlePosition) =
+        settings.putString("subtitlePosition", json.encodeToString(position))
+
     fun getWatchHistory(): Flow<List<ContinueWatchingEntry>> =
         settings.getStringFlow("watchHistory", "[]")
             .map { decode(it) }
@@ -57,4 +64,8 @@ class SettingManager(val settings: FlowSettings) {
     private fun decode(value: String): List<ContinueWatchingEntry> =
         runCatching { json.decodeFromString<List<ContinueWatchingEntry>>(value) }
             .getOrElse { emptyList() }
+
+    private fun decodeSubtitlePosition(value: String): SubtitlePosition =
+        runCatching { json.decodeFromString<SubtitlePosition>(value) }
+            .getOrElse { SubtitlePosition() }
 }
