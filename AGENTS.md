@@ -28,8 +28,8 @@ There are no tests in this project.
 2. `viewmodel/` — `androidx.lifecycle.ViewModel` subclasses, expose `StateFlow`s.
 3. `repository/` — data access layer:
    - `AnimeRepository.kt` — wraps `JikanClient` (jikan4k library, Tenrai API); returns `ResponseState` sealed type (`Loading / Success / Error / None`).
-   - `extractor/` — video streaming. `StreamingExtractor` interface → `BaseExtractor` (shared title/episode matching via Levenshtein similarity) → per-provider implementations (`VoirAnimeExtractor`, `AnimeSamaExtractor`, `GogoAnimeExtractor`, `HiAnimeExtractor`). `StreamRepository` fans out extraction concurrently (`async`/`awaitAll`). `ExtractorHttp`/`ExtractorHttpClient` use expect/actual per platform.
-4. `di/Koin.kt` (commonMain) + platform `Koin.*.kt` files — wire `JikanClient`, `SettingManager`, repositories, extractors, and ViewModels via a `platformModule` expect/actual.
+   - `provider/` — video streaming. `StreamingProvider` interface → `BaseProvider` (shared title/episode matching via Levenshtein similarity) → per-provider implementations (`VoirAnimeProvider`, `AnimeSamaProvider`, `AnimePaheProvider`, `AnimeYaProvider`). `StreamRepository` fans out provider extraction concurrently (`callbackFlow`). `ProviderHttp`/`ProviderHttpClient` use expect/actual per platform.
+4. `di/Koin.kt` (commonMain) + platform `Koin.*.kt` files — wire `JikanClient`, `SettingManager`, repositories, providers, and ViewModels via a `platformModule` expect/actual.
 
 **Navigation:** Voyager with `Navigator` root in `App.kt`. Screens are `object` or `class` instances pushed onto the Voyager stack.
 
