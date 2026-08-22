@@ -2,11 +2,19 @@ package fr.vinarnt.animu.finder.compose.di
 
 import fr.vinarnt.animu.finder.compose.logger.KermitKoinLogger
 import fr.vinarnt.animu.finder.compose.repository.AnimeRepository
-import fr.vinarnt.animu.finder.compose.repository.extractor.ExtractorHttpClient
-import fr.vinarnt.animu.finder.compose.repository.extractor.StreamRepository
-import fr.vinarnt.animu.finder.compose.repository.extractor.StreamingExtractor
-import fr.vinarnt.animu.finder.compose.repository.extractor.VoirAnimeExtractor
-import fr.vinarnt.animu.finder.compose.repository.extractor.provideExtractorHttpClient
+import fr.vinarnt.animu.finder.compose.repository.SubtitleRepository
+import fr.vinarnt.animu.finder.compose.repository.provider.AnimeHeavenProvider
+import fr.vinarnt.animu.finder.compose.repository.provider.AniNekoProvider
+import fr.vinarnt.animu.finder.compose.repository.provider.AnimePaheProvider
+import fr.vinarnt.animu.finder.compose.repository.provider.AnimeParadiseProvider
+import fr.vinarnt.animu.finder.compose.repository.provider.AnimeSamaProvider
+import fr.vinarnt.animu.finder.compose.repository.provider.AnimeYaProvider
+import fr.vinarnt.animu.finder.compose.repository.provider.KickAssAnimeProvider
+import fr.vinarnt.animu.finder.compose.repository.provider.ProviderHttpClient
+import fr.vinarnt.animu.finder.compose.repository.provider.StreamRepository
+import fr.vinarnt.animu.finder.compose.repository.provider.StreamingProvider
+import fr.vinarnt.animu.finder.compose.repository.provider.VoirAnimeProvider
+import fr.vinarnt.animu.finder.compose.repository.provider.provideProviderHttpClient
 import fr.vinarnt.animu.finder.compose.service.ContinueWatchingCache
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeDetailViewModel
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeListViewModel
@@ -48,18 +56,26 @@ private val commonModule = module {
     viewModelOf(::EpisodeDetailViewModel)
 
     singleOf(::AnimeRepository)
+    singleOf(::SubtitleRepository)
+    singleOf(::StreamRepository)
     singleOf(::ContinueWatchingCache)
 
-    single { provideExtractorHttpClient() }
+    single { provideProviderHttpClient() }
 
-    single<List<StreamingExtractor>> {
-        val http: ExtractorHttpClient = get()
+    single<List<StreamingProvider>> {
+        val http: ProviderHttpClient = get()
         listOf(
-            VoirAnimeExtractor(http),
+            AniNekoProvider(http),
+            VoirAnimeProvider(http),
+            AnimeSamaProvider(http),
+            AnimePaheProvider(http),
+            AnimeYaProvider(http),
+            AnimeHeavenProvider(http),
+            AnimeParadiseProvider(http),
+            KickAssAnimeProvider(http),
         )
     }
 
-    singleOf(::StreamRepository)
 }
 
 val appModule = module {

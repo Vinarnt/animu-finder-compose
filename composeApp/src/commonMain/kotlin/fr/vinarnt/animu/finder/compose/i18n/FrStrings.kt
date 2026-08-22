@@ -132,6 +132,7 @@ val FrStrings = Strings(
         airingDate = "Date de diffusion",
         synopsis = "Synopsis",
         streams = "Streams disponibles",
+        loadingStreams = "Chargement…",
         noStreams = "Aucun stream trouvé",
         couldNotLoadStreams = "Impossible de charger les streams",
         noSource = "Aucune source sélectionnée",

@@ -82,6 +82,7 @@ data class EpisodeDetailStrings(
     val airingDate: String,
     val synopsis: String,
     val streams: String,
+    val loadingStreams: String,
     val noStreams: String,
     val couldNotLoadStreams: String,
     val noSource: String,

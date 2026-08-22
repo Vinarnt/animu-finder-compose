@@ -1,8 +1,8 @@
-package fr.vinarnt.animu.finder.compose.repository.extractor
+package fr.vinarnt.animu.finder.compose.repository.provider
 
 import fr.vinarnt.animu.finder.compose.model.StreamSource
 
-interface StreamingExtractor {
+interface StreamingProvider {
     val providerId: String
     val providerName: String
     suspend fun extractStreams(query: EpisodeSearchQuery): List<StreamSource>

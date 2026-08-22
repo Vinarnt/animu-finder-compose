@@ -5,13 +5,13 @@ import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import fr.vinarnt.animu.finder.compose.model.StreamSource
 import fr.vinarnt.animu.finder.compose.repository.AnimeRepository
-import fr.vinarnt.animu.finder.compose.repository.extractor.EpisodeSearchQuery
-import fr.vinarnt.animu.finder.compose.repository.extractor.ProviderError
-import fr.vinarnt.animu.finder.compose.repository.extractor.StreamRepository
+import fr.vinarnt.animu.finder.compose.repository.provider.EpisodeSearchQuery
+import fr.vinarnt.animu.finder.compose.repository.provider.StreamRepository
 import fr.vinarnt.jikan4k.models.GetAnimeByIdEpisodesByEpisodeId200ResponseData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 
 class EpisodeDetailViewModel(
@@ -24,9 +24,6 @@ class EpisodeDetailViewModel(
 
     private val _streams = MutableStateFlow<List<StreamSource>>(emptyList())
     val streams: StateFlow<List<StreamSource>> = _streams.asStateFlow()
-
-    private val _streamErrors = MutableStateFlow<List<ProviderError>>(emptyList())
-    val streamErrors: StateFlow<List<ProviderError>> = _streamErrors.asStateFlow()
 
     private val _selectedStream = MutableStateFlow<StreamSource?>(null)
     val selectedStream: StateFlow<StreamSource?> = _selectedStream.asStateFlow()
@@ -56,25 +53,22 @@ class EpisodeDetailViewModel(
         _loadingStreams.value = true
         _streams.value = emptyList()
         _selectedStream.value = null
-        _streamErrors.value = emptyList()
         viewModelScope.launch {
             try {
-                val result = streamRepository.getStreams(query)
-                if (generation != streamLoadGeneration) return@launch
-                _streams.value = result.streams.distinctBy { it.url }
-                _streamErrors.value = result.errors
-                _selectedStream.value = result.streams.firstOrNull()
+                streamRepository.getStreams(query)
+                    .onCompletion {
+                        if (generation == streamLoadGeneration) _loadingStreams.value = false
+                    }
+                    .collect { result ->
+                        if (generation != streamLoadGeneration) return@collect
+                        _streams.value = (_streams.value + result.streams).distinctBy { it.url }
+                        if (_selectedStream.value == null) {
+                            _selectedStream.value = result.streams.firstOrNull()
+                        }
+                    }
             } catch (e: Exception) {
-                if (generation != streamLoadGeneration) return@launch
                 Logger.w("Failed to load streams: ${e.message}", e)
-                _streams.value = emptyList()
-                _streamErrors.value = listOf(
-                    ProviderError("all", "All providers", e.message ?: "unknown error")
-                )
-            } finally {
-                if (generation == streamLoadGeneration) {
-                    _loadingStreams.value = false
-                }
+                if (generation == streamLoadGeneration) _loadingStreams.value = false
             }
         }
     }

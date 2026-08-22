@@ -1,4 +1,4 @@
-package fr.vinarnt.animu.finder.compose.repository.extractor
+package fr.vinarnt.animu.finder.compose.repository.provider
 
 object EmbedResolver {
 

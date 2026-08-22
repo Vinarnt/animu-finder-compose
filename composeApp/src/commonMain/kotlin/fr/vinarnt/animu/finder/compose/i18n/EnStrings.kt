@@ -119,6 +119,7 @@ val EnStrings = Strings(
         airingDate = "Airing date",
         synopsis = "Synopsis",
         streams = "Available streams",
+        loadingStreams = "Loading…",
         noStreams = "No stream found",
         couldNotLoadStreams = "Could not load streams",
         noSource = "No source selected",

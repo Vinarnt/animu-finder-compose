@@ -1,4 +1,4 @@
-package fr.vinarnt.animu.finder.compose.repository.extractor
+package fr.vinarnt.animu.finder.compose.repository.provider
 
 import co.touchlab.kermit.Logger
 import fr.vinarnt.animu.finder.compose.model.StreamSource
@@ -8,7 +8,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 
-class VoirAnimeExtractor(http: ExtractorHttpClient) : BaseExtractor(http) {
+class VoirAnimeProvider(http: ProviderHttpClient) : BaseProvider(http) {
 
     override val providerId = "voiranime"
     override val providerName = "VoirAnime"
@@ -20,12 +20,22 @@ class VoirAnimeExtractor(http: ExtractorHttpClient) : BaseExtractor(http) {
     private data class Candidate(val slug: String, val title: String, val episodeCount: Int)
 
     override suspend fun extractStreams(query: EpisodeSearchQuery): List<StreamSource> = coroutineScope {
+        Logger.i("VoirAnime: starting extraction for '${query.animeTitle}' episode ${query.episode.absolute}")
         val slugs = resolveSlugs(query)
-        if (slugs.isEmpty()) return@coroutineScope emptyList()
+        if (slugs.isEmpty()) {
+            Logger.w("VoirAnime: no slugs resolved for '${query.animeTitle}'")
+            return@coroutineScope emptyList()
+        }
+        Logger.i("VoirAnime: resolved ${slugs.size} slug(s): $slugs")
 
         slugs.map { (slug, isDub) ->
             async {
-                val resolved = resolveStreamUrl(slug, query.episode.absolute) ?: return@async null
+                val resolved = resolveStreamUrl(slug, query.episode.absolute)
+                if (resolved == null) {
+                    Logger.w("VoirAnime: no stream for slug '$slug' (dub=$isDub) ep ${query.episode.absolute}")
+                    return@async null
+                }
+                Logger.i("VoirAnime: resolved stream for '$slug' (dub=$isDub) -> ${resolved.url}")
                 StreamSource(
                     providerId = providerId,
                     url = resolved.url,
@@ -67,8 +77,10 @@ class VoirAnimeExtractor(http: ExtractorHttpClient) : BaseExtractor(http) {
         }
 
     private suspend fun searchCandidates(query: EpisodeSearchQuery): List<Candidate> {
+        val searchUrl = "$base/?post_type=wp-manga&s=${encode(query.animeTitle)}"
+        Logger.d("VoirAnime: searching '${query.animeTitle}' -> $searchUrl")
         val text = try {
-            http.getText("$base/?post_type=wp-manga&s=${encode(query.animeTitle)}", headers())
+            http.getText(searchUrl, headers())
         } catch (e: Exception) {
             Logger.w("VoirAnime search failed: ${e.message}", e)
             return emptyList()
@@ -77,7 +89,7 @@ class VoirAnimeExtractor(http: ExtractorHttpClient) : BaseExtractor(http) {
         val regex = Regex(
             """<h3 class="h4"><a href="[^"]*/anime/([a-z0-9-]+)/"[^>]*>([^<]+)</a></h3>[\s\S]*?<span class="font-meta chapter"><a href="[^"]*">(\d+)</a></span>"""
         )
-        return regex.findAll(text).mapNotNull { match ->
+        val candidates = regex.findAll(text).mapNotNull { match ->
             val slug = match.groupValues[1]
             if (slug == "feed") return@mapNotNull null
             Candidate(
@@ -86,6 +98,8 @@ class VoirAnimeExtractor(http: ExtractorHttpClient) : BaseExtractor(http) {
                 episodeCount = match.groupValues[3].toIntOrNull() ?: 0,
             )
         }.toList()
+        Logger.d("VoirAnime: search returned ${candidates.size} candidate(s)")
+        return candidates
     }
 
     private suspend fun slugifyProbe(query: EpisodeSearchQuery): Candidate? {
@@ -123,28 +137,38 @@ class VoirAnimeExtractor(http: ExtractorHttpClient) : BaseExtractor(http) {
         ).distinct()
 
         val constructedUrl = "$base/anime/$slug/$episodeBase-${numbers.first()}-$suffix/"
+        Logger.d("VoirAnime: probing episode page $constructedUrl")
         var episodeHtml = fetchPageWithPlayer(constructedUrl)
 
         if (episodeHtml == null) {
+            Logger.d("VoirAnime: direct episode page failed, scanning anime page for episode $numbers")
             episodeHtml = scanAnimePageForEpisode(slug, numbers, suffix)
         }
-        if (episodeHtml == null) return null
+        if (episodeHtml == null) {
+            Logger.w("VoirAnime: no episode page found for slug '$slug' ep $episodeNumber")
+            return null
+        }
 
         val iframes = extractIframes(episodeHtml)
             // Only fetch embeds we can actually resolve; voe/streamtape/... require
             // JavaScript and would otherwise block for the full HTTP timeout.
             .filter { EmbedResolver.canResolve(it) }
+        Logger.d("VoirAnime: episode page has ${iframes.size} resolvable iframe(s)")
         for (iframe in iframes) {
             try {
                 val embedHtml = http.getText(iframe, headers())
                 val stream = EmbedResolver.extract(iframe, embedHtml)
                 if (stream != null) {
+                    Logger.i("VoirAnime: extracted stream from embed $iframe -> $stream")
                     return Resolved(stream, refererOf(iframe))
+                } else {
+                    Logger.d("VoirAnime: no stream extractable from embed $iframe")
                 }
             } catch (e: Exception) {
                 Logger.w("VoirAnime embed $iframe failed: ${e.message}", e)
             }
         }
+        Logger.w("VoirAnime: no embed resolved for slug '$slug' ep $episodeNumber")
         return null
     }
 
@@ -153,6 +177,7 @@ class VoirAnimeExtractor(http: ExtractorHttpClient) : BaseExtractor(http) {
             val html = http.getText(url, headers())
             if (extractIframes(html).isEmpty()) null else html
         } catch (e: Exception) {
+            Logger.w("VoirAnime page fetch failed for $url: ${e.message}")
             null
         }
     }
@@ -161,6 +186,7 @@ class VoirAnimeExtractor(http: ExtractorHttpClient) : BaseExtractor(http) {
         val animeHtml = try {
             http.getText("$base/anime/$slug/", headers())
         } catch (e: Exception) {
+            Logger.w("VoirAnime anime page fetch failed for $slug: ${e.message}")
             return null
         }
         for (number in numbers) {
@@ -171,6 +197,7 @@ class VoirAnimeExtractor(http: ExtractorHttpClient) : BaseExtractor(http) {
             if (href != null) {
                 val url = href.replace("\\/", "/")
                 val full = if (url.startsWith("http")) url else "$base$url"
+                Logger.d("VoirAnime: found episode link $full")
                 val html = fetchPageWithPlayer(full)
                 if (html != null) return html
             }

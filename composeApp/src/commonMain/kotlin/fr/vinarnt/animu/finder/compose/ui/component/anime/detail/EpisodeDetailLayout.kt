@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.model.StreamSource
-import fr.vinarnt.animu.finder.compose.repository.extractor.ProviderError
 import fr.vinarnt.animu.finder.compose.ui.theme.CornerRadius
 import fr.vinarnt.animu.finder.compose.ui.theme.Elevation
 import fr.vinarnt.animu.finder.compose.ui.theme.Size
@@ -35,7 +34,6 @@ fun EpisodeDetailLayout(
     episode: GetAnimeByIdEpisodesByEpisodeId200ResponseData?,
     episodeNumber: Int,
     streams: List<StreamSource>,
-    streamErrors: List<ProviderError>,
     selectedStream: StreamSource?,
     loadingStreams: Boolean,
     onSelectStream: (StreamSource) -> Unit,
@@ -102,7 +100,6 @@ fun EpisodeDetailLayout(
                     ) {
                         StreamSourceList(
                             streams = streams,
-                            errors = streamErrors,
                             selectedStream = selectedStream,
                             loading = loadingStreams,
                             onSelect = onSelectStream,
@@ -121,7 +118,6 @@ fun EpisodeDetailLayout(
                     ) {
                         StreamSourceList(
                             streams = streams,
-                            errors = streamErrors,
                             selectedStream = selectedStream,
                             loading = loadingStreams,
                             onSelect = onSelectStream,

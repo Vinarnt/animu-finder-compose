@@ -25,8 +25,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fr.vinarnt.animu.finder.compose.model.ContinueWatchingEntry
 import fr.vinarnt.animu.finder.compose.model.StreamSource
-import fr.vinarnt.animu.finder.compose.repository.extractor.EpisodeRef
-import fr.vinarnt.animu.finder.compose.repository.extractor.EpisodeSearchQuery
+import fr.vinarnt.animu.finder.compose.repository.provider.EpisodeRef
+import fr.vinarnt.animu.finder.compose.repository.provider.EpisodeSearchQuery
 import fr.vinarnt.animu.finder.compose.service.SettingManager
 import fr.vinarnt.animu.finder.compose.ui.component.anime.detail.EpisodeDetailLayout
 import fr.vinarnt.animu.finder.compose.ui.component.base.layout.MainLayout
@@ -53,7 +53,6 @@ class EpisodeDetailScreen(
         val settingManager = koinInject<SettingManager>()
         val episode by vm.episode.collectAsStateWithLifecycle()
         val streams by vm.streams.collectAsStateWithLifecycle()
-        val streamErrors by vm.streamErrors.collectAsStateWithLifecycle()
         val selectedStream by vm.selectedStream.collectAsStateWithLifecycle()
         val loadingStreams by vm.loadingStreams.collectAsStateWithLifecycle()
 
@@ -99,7 +98,6 @@ class EpisodeDetailScreen(
                     episode = episode,
                     episodeNumber = episodeNumber,
                     streams = streams,
-                    streamErrors = streamErrors,
                     selectedStream = selectedStream,
                     loadingStreams = loadingStreams,
                     onSelectStream = vm::selectStream,

@@ -1,4 +1,4 @@
-package fr.vinarnt.animu.finder.compose.repository.extractor
+package fr.vinarnt.animu.finder.compose.repository.provider
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRedirect
@@ -23,7 +23,7 @@ class CloudflareChallengeException(val url: String) :
 const val DEFAULT_USER_AGENT =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 
-fun createExtractorHttpClient(): HttpClient = HttpClient {
+fun createProviderHttpClient(): HttpClient = HttpClient {
     install(HttpTimeout) {
         connectTimeoutMillis = 10_000
         requestTimeoutMillis = 10_000
@@ -40,7 +40,7 @@ fun createExtractorHttpClient(): HttpClient = HttpClient {
     }
 }
 
-class ExtractorHttpClient(
+class ProviderHttpClient(
     private val client: HttpClient,
     private val corsProxies: List<(String) -> String> = emptyList(),
 ) {
@@ -61,6 +61,13 @@ class ExtractorHttpClient(
         }
         return fetch(url, headers, body)
     }
+
+    suspend fun postJson(
+        url: String,
+        jsonBody: String,
+        headers: Map<String, String> = emptyMap(),
+    ): String =
+        fetch(url, headers + (HttpHeaders.ContentType to ContentType.Application.Json.toString()), jsonBody)
 
     private suspend fun fetch(url: String, headers: Map<String, String>, body: String?): String {
         if (corsProxies.isEmpty()) {
@@ -88,7 +95,10 @@ class ExtractorHttpClient(
         } else {
             client.post(url) {
                 headers.forEach { (key, value) -> header(key, value) }
-                setBody(TextContent(body, ContentType.Application.FormUrlEncoded))
+                val contentType = headers[HttpHeaders.ContentType]
+                    ?.let { runCatching { ContentType.parse(it) }.getOrNull() }
+                    ?: ContentType.Application.FormUrlEncoded
+                setBody(TextContent(body, contentType))
             }
         }
 

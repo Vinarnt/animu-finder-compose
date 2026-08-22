@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.model.StreamSource
 import fr.vinarnt.animu.finder.compose.model.SubtitleType
-import fr.vinarnt.animu.finder.compose.repository.extractor.ProviderError
 import fr.vinarnt.animu.finder.compose.ui.theme.CornerRadius
 import fr.vinarnt.animu.finder.compose.ui.theme.Elevation
 import fr.vinarnt.animu.finder.compose.ui.theme.Size
@@ -34,7 +33,6 @@ import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
 @Composable
 fun StreamSourceList(
     streams: List<StreamSource>,
-    errors: List<ProviderError>,
     selectedStream: StreamSource?,
     loading: Boolean,
     onSelect: (StreamSource) -> Unit,
@@ -52,7 +50,7 @@ fun StreamSourceList(
         )
 
         when {
-            loading -> {
+            loading && streams.isEmpty() -> {
                 Box(
                     modifier = Modifier.fillMaxWidth().padding(Spacing.md),
                     contentAlignment = Alignment.Center,
@@ -61,35 +59,40 @@ fun StreamSourceList(
                 }
             }
 
-            streams.isEmpty() && errors.isEmpty() -> {
-                Text(
-                    text = s.noStreams,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            else -> {
+                streams.forEach { source ->
+                    StreamSourceItem(
+                        source = source,
+                        selected = source == selectedStream,
+                        onClick = { onSelect(source) },
+                    )
+                }
 
-            streams.isEmpty() -> {
-                Text(
-                    text = s.couldNotLoadStreams,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
-                )
-                errors.forEach { error ->
+                if (loading) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = Spacing.xs),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(Size.CircleProgressIndicator.sm),
+                            strokeWidth = 2.dp,
+                        )
+                        Text(
+                            text = s.loadingStreams,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+
+                if (!loading && streams.isEmpty()) {
                     Text(
-                        text = "• ${error.providerName}: ${error.message}",
-                        style = MaterialTheme.typography.labelMedium,
+                        text = s.noStreams,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            }
-
-            else -> streams.forEach { source ->
-                StreamSourceItem(
-                    source = source,
-                    selected = source == selectedStream,
-                    onClick = { onSelect(source) },
-                )
             }
         }
     }

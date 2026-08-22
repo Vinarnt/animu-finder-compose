@@ -1,11 +1,11 @@
-package fr.vinarnt.animu.finder.compose.repository.extractor
+package fr.vinarnt.animu.finder.compose.repository.provider
 
 import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.json.Json
 
-abstract class BaseExtractor(
-    protected val http: ExtractorHttpClient,
-) : StreamingExtractor {
+abstract class BaseProvider(
+    protected val http: ProviderHttpClient,
+) : StreamingProvider {
 
     protected val json = Json { ignoreUnknownKeys = true }
 
