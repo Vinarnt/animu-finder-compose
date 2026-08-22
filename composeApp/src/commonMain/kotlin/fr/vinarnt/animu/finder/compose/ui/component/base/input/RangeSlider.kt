@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import fr.vinarnt.animu.finder.compose.ui.theme.CornerRadius
-import fr.vinarnt.animu.finder.compose.ui.theme.Elevation
 import fr.vinarnt.animu.finder.compose.ui.theme.Size
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
 import androidx.compose.material3.RangeSlider as M3RangeSlider
@@ -67,27 +66,30 @@ fun RangeSliderControl(
         startThumb = {
             Box(
                 Modifier
-                    .size(14.dp)
-                    .shadow(Elevation.sm, CircleShape)
+                    .size(16.dp)
+                    .shadow(2.dp, CircleShape)
                     .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
             )
         },
         endThumb = {
             Box(
                 Modifier
-                    .size(14.dp)
-                    .shadow(Elevation.sm, CircleShape)
+                    .size(16.dp)
+                    .shadow(2.dp, CircleShape)
                     .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
             )
         },
         track = { state ->
             SliderDefaults.Track(
                 rangeSliderState = state,
-                modifier = Modifier.height(3.dp),
+                modifier = Modifier.height(4.dp),
                 colors = SliderDefaults.colors(
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
                     activeTickColor = MaterialTheme.colorScheme.onPrimary,
-                    inactiveTickColor = MaterialTheme.colorScheme.primary,
-                    inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant
+                    inactiveTickColor = MaterialTheme.colorScheme.outlineVariant
                 )
             )
         },
