@@ -14,14 +14,18 @@ This file provides guidance to AI coding agents (OpenCode, Claude Code, Codex, C
 # Compile check (fast, no run)
 ./gradlew :composeApp:compileKotlinDesktop
 
-# Android: use IntelliJ IDEA or Android Studio, run the android MainActivity configuration
+# Android: use IntelliJ IDEA or Android Studio, run the androidApp MainActivity configuration
 ```
 
 There are no tests in this project.
 
 ## Architecture Overview
 
-**Stack:** Kotlin Multiplatform (Android, iOS, Desktop JVM, WasmJS) + Compose Multiplatform + Material3. Single `composeApp` module; all shared code lives in `commonMain`.
+**Stack:** Kotlin Multiplatform (Android, iOS, Desktop JVM, WasmJS) + Compose Multiplatform + Material3. Shared code lives in `composeApp` (`commonMain`); the Android entry point lives in the separate `androidApp` module.
+
+**Modules:**
+- `composeApp` — KMP module with all shared code (`commonMain`) plus desktop (`desktopMain`), iOS (`iosMain`), and wasm (`wasmJsMain`) targets. The Android target uses the `com.android.kotlin.multiplatform.library` (Android-KMP) plugin, configured via `kotlin.android {}` — it is a library, not an application.
+- `androidApp` — pure Android application module (`com.android.application`, built-in Kotlin). Hosts `MainActivity`, the `AndroidManifest.xml`, and Android `res/`; depends on `composeApp`. Configured with the AGP 9 `kotlin.target {}` DSL.
 
 **Layers:**
 1. `navigation/screen/` — Voyager `Screen` implementations, own their `@Composable Content()`. Screens pull ViewModels via `koinViewModel()`.
@@ -86,4 +90,4 @@ The following are enabled project-wide in `build.gradle.kts` and can be used wit
 ## Platform Targets
 
 - Desktop JVM targets JVM 17 (`jvm("desktop")`).
-- Android targets JVM 11 (`androidTarget`).
+- Android targets JVM 11 (configured via `kotlin.android.compilerOptions` in `composeApp` and `kotlin.target.compilerOptions` in `androidApp`).

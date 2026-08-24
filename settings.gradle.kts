@@ -35,6 +35,7 @@ plugins {
 }
 
 include(":composeApp")
+include(":androidApp")
 // To link local source folder for direct testing
 //includeBuild("../jikan4k") {
 //    dependencySubstitution {
