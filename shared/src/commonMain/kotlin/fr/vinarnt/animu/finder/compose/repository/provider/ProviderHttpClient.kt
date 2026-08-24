@@ -14,9 +14,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.content.TextContent
 import io.ktor.http.encodeURLParameter
 import io.ktor.http.isSuccess
-import kotlin.concurrent.Volatile
-import kotlin.time.TimeSource
-
 class CloudflareChallengeException(val url: String) :
     Exception("Blocked by anti-bot challenge: $url")
 
@@ -40,16 +37,11 @@ fun createProviderHttpClient(): HttpClient = HttpClient {
     }
 }
 
-class ProviderHttpClient(
-    private val client: HttpClient,
-    private val corsProxies: List<(String) -> String> = emptyList(),
+open class ProviderHttpClient(
+    protected val client: HttpClient,
 ) {
-
-    @Volatile
-    private var rankedProxies: List<(String) -> String>? = null
-
     suspend fun getText(url: String, headers: Map<String, String> = emptyMap()): String =
-        fetch(url, headers, null)
+        execute(url, headers, null)
 
     suspend fun postForm(
         url: String,
@@ -59,7 +51,7 @@ class ProviderHttpClient(
         val body = form.entries.joinToString("&") { (key, value) ->
             "${key.encodeURLParameter()}=${value.encodeURLParameter()}"
         }
-        return fetch(url, headers, body)
+        return execute(url, headers, body)
     }
 
     suspend fun postJson(
@@ -67,27 +59,9 @@ class ProviderHttpClient(
         jsonBody: String,
         headers: Map<String, String> = emptyMap(),
     ): String =
-        fetch(url, headers + (HttpHeaders.ContentType to ContentType.Application.Json.toString()), jsonBody)
+        execute(url, headers + (HttpHeaders.ContentType to ContentType.Application.Json.toString()), jsonBody)
 
-    private suspend fun fetch(url: String, headers: Map<String, String>, body: String?): String {
-        if (corsProxies.isEmpty()) {
-            return request(url, headers, body)
-        }
-
-        val proxies = rankedProxies ?: rankByLatency().also { rankedProxies = it }
-
-        var lastError: Throwable? = null
-        for (proxy in proxies) {
-            try {
-                return request(proxy(url), headers, body)
-            } catch (e: Exception) {
-                lastError = e
-            }
-        }
-        throw lastError ?: Exception("All CORS proxies failed")
-    }
-
-    private suspend fun request(url: String, headers: Map<String, String>, body: String?): String {
+    protected open suspend fun execute(url: String, headers: Map<String, String>, body: String?): String {
         val response = if (body == null) {
             client.get(url) {
                 headers.forEach { (key, value) -> header(key, value) }
@@ -115,26 +89,4 @@ class ProviderHttpClient(
             lower.contains("_gs_challenge") ||
             (lower.contains("just a moment") && lower.contains("cf-ray"))
     }
-
-    private suspend fun rankByLatency(): List<(String) -> String> {
-        val probe = "https://example.com/"
-        val results = corsProxies.map { proxy ->
-            val mark = TimeSource.Monotonic.markNow()
-            val ok = try {
-                client.get(proxy(probe)).status.isSuccess()
-            } catch (e: Exception) {
-                false
-            }
-            Triple(proxy, mark.elapsedNow().inWholeMilliseconds, ok)
-        }
-        return results
-            .sortedWith(compareBy({ !it.third }, { it.second }))
-            .map { it.first }
-    }
 }
-
-val CORS_PROXIES: List<(String) -> String> = listOf(
-    { url -> "https://api.allorigins.win/raw?url=${url.encodeURLParameter()}" },
-    { url -> "https://api.codetabs.com/v1/proxy?quest=${url.encodeURLParameter()}" },
-    { url -> "https://cors.isomorphic-git.org/$url" },
-)
