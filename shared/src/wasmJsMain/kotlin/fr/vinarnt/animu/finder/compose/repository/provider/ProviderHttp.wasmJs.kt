@@ -1,10 +1,7 @@
 package fr.vinarnt.animu.finder.compose.repository.provider
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
 import io.ktor.http.encodeURLParameter
-import io.ktor.http.isSuccess
-import kotlin.time.TimeSource
 
 actual fun provideProviderHttpClient(): ProviderHttpClient =
     CorsProviderHttpClient(createProviderHttpClient(), CORS_PROXIES)
@@ -14,13 +11,17 @@ class CorsProviderHttpClient(
     private val corsProxies: List<(String) -> String>,
 ) : ProviderHttpClient(client) {
 
-    private var rankedProxies: List<(String) -> String>? = null
+    private var nextProxyIndex = 0
 
     override suspend fun execute(url: String, headers: Map<String, String>, body: String?): String {
-        val proxies = rankedProxies ?: rankByLatency().also { rankedProxies = it }
+        if (corsProxies.isEmpty()) return super.execute(url, headers, body)
+
+        val start = nextProxyIndex
+        nextProxyIndex = (nextProxyIndex + 1) % corsProxies.size
 
         var lastError: Throwable? = null
-        for (proxy in proxies) {
+        for (i in corsProxies.indices) {
+            val proxy = corsProxies[(start + i) % corsProxies.size]
             try {
                 return super.execute(proxy(url), headers, body)
             } catch (e: Exception) {
@@ -28,22 +29,6 @@ class CorsProviderHttpClient(
             }
         }
         throw lastError ?: Exception("All CORS proxies failed")
-    }
-
-    private suspend fun rankByLatency(): List<(String) -> String> {
-        val probe = "https://example.com/"
-        val results = corsProxies.map { proxy ->
-            val mark = TimeSource.Monotonic.markNow()
-            val ok = try {
-                client.get(proxy(probe)).status.isSuccess()
-            } catch (e: Exception) {
-                false
-            }
-            Triple(proxy, mark.elapsedNow().inWholeMilliseconds, ok)
-        }
-        return results
-            .sortedWith(compareBy({ !it.third }, { it.second }))
-            .map { it.first }
     }
 }
 
