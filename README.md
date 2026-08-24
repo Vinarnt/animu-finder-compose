@@ -6,12 +6,12 @@ Compose Multiplatform test project
 
 ### Launch desktop
 ```shell
-gradlew run
+./gradlew :desktopApp:run
 ```
 
 ### Launch web (wasm)
 ```shell
-gradlew wasmJsBrowserDevelopmentRun
+./gradlew :webApp:wasmJsBrowserDevelopmentRun
 ```
 
 
