@@ -313,13 +313,13 @@ class AnimeYaProvider(http: ProviderHttpClient) : BaseProvider(http) {
             Logger.w("AnimeYa: embed fetch failed for $pageUrl: ${e.message}")
             return null
         }
-        Regex("""https?://[^\s"'<>]+\.m3u8[^\s"'<>]*""").find(html)?.let {
-            return it.value
+        Regex("""https?://[^\s"'<>\\]+\.m3u8[^\s"'<>\\]*""").find(html)?.let {
+            return it.value.trimEnd('\\')
         }
         // Some hosts (e.g. mp4upload) expose the direct file in a player config:
         // `player.src({ type: "video/mp4", src: "https://...video.mp4" })`.
         Regex("""(?:src|file)\s*[:=]\s*["'](https?://[^"']+\.(?:m3u8|mp4|webm|mkv)(?:[?#][^"']*)?)["']""")
-            .find(html)?.let { return it.groupValues[1] }
+            .find(html)?.let { return it.groupValues[1].trimEnd('\\') }
 
         val candidates = Regex("""(?:iframe|source)[^>]+src=["']([^"']+)["']""")
             .findAll(html)
@@ -336,11 +336,11 @@ class AnimeYaProvider(http: ProviderHttpClient) : BaseProvider(http) {
             } catch (e: Exception) {
                 continue
             }
-            Regex("""https?://[^\s"'<>]+\.m3u8[^\s"'<>]*""").find(page)?.let {
-                return it.value
+            Regex("""https?://[^\s"'<>\\]+\.m3u8[^\s"'<>\\]*""").find(page)?.let {
+                return it.value.trimEnd('\\')
             }
             Regex("""(?:src|file)\s*[:=]\s*["'](https?://[^"']+\.(?:m3u8|mp4|webm|mkv)(?:[?#][^"']*)?)["']""")
-                .find(page)?.let { return it.groupValues[1] }
+                .find(page)?.let { return it.groupValues[1].trimEnd('\\') }
         }
         Logger.w("AnimeYa: could not extract m3u8 from embed $pageUrl")
         return null

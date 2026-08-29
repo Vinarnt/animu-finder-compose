@@ -3,7 +3,9 @@ package fr.vinarnt.animu.finder.compose.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import fr.vinarnt.animu.finder.compose.model.StreamPlayability
 import fr.vinarnt.animu.finder.compose.model.StreamSource
+import fr.vinarnt.animu.finder.compose.model.currentStreamPlatform
 import fr.vinarnt.animu.finder.compose.repository.AnimeRepository
 import fr.vinarnt.animu.finder.compose.repository.provider.EpisodeSearchQuery
 import fr.vinarnt.animu.finder.compose.repository.provider.StreamRepository
@@ -79,9 +81,11 @@ class EpisodeDetailViewModel(
                     }
                     .collect { result ->
                         if (generation != streamLoadGeneration) return@collect
-                        _streams.value = (_streams.value + result.streams).distinctBy { it.url }
+                        val platform = currentStreamPlatform
+                        val playable = result.streams.filter { platform in StreamPlayability.platformsFor(it.url) }
+                        _streams.value = (_streams.value + playable).distinctBy { it.url }
                         if (_selectedStream.value == null) {
-                            _selectedStream.value = result.streams.firstOrNull()
+                            _selectedStream.value = playable.firstOrNull()
                         }
                     }
             } catch (e: Exception) {

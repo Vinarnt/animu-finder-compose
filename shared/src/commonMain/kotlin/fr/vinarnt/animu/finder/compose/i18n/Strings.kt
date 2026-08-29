@@ -104,7 +104,8 @@ data class PlayerStrings(
     val exitFullscreen: String,
     val speed: String,
     val audio: String,
-    val error: String
+    val error: String,
+    val retry: String
 )
 
 data class AnimeListStrings(

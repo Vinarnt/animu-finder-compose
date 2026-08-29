@@ -152,6 +152,7 @@ val FrStrings = Strings(
         exitFullscreen = "Quitter le plein écran",
         speed = "Vitesse de lecture",
         audio = "Piste audio",
-        error = "Erreur de lecture"
+        error = "Erreur de lecture",
+        retry = "Réessayer"
     )
 )

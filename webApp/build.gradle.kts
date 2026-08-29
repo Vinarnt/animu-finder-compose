@@ -23,6 +23,7 @@ kotlin {
             commonWebpackConfig {
                 outputFileName = "webApp.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
+                    open = false
                     static = (static ?: mutableListOf()).apply {
                         // Serve sources to debug inside browser
                         add(rootDirPath)

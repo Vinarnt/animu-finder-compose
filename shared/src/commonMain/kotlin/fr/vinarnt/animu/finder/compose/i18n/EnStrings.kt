@@ -139,7 +139,8 @@ val EnStrings = Strings(
         exitFullscreen = "Exit fullscreen",
         speed = "Playback speed",
         audio = "Audio track",
-        error = "Playback error"
+        error = "Playback error",
+        retry = "Retry"
     )
 )
 

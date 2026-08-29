@@ -59,6 +59,7 @@ kotlin {
     sourceSets {
         val commonMain by getting
         val desktopMain by getting
+        val wasmJsMain by getting
 
         val nonJsMain by creating {
             dependsOn(commonMain)
@@ -124,6 +125,10 @@ kotlin {
             dependencies {
                 implementation(libs.ktor.client.darwin)
             }
+        }
+
+        wasmJsMain.dependencies {
+            implementation(npm("hls.js", "1.7.1"))
         }
     }
 }

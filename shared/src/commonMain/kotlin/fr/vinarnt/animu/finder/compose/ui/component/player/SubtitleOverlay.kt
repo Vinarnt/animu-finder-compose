@@ -12,7 +12,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -27,15 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import fr.vinarnt.animu.finder.compose.model.SubtitleCue
 import fr.vinarnt.animu.finder.compose.model.SubtitlePosition
 import fr.vinarnt.animu.finder.compose.model.SubtitleTrack
-import fr.vinarnt.animu.finder.compose.model.SubtitleType
-import fr.vinarnt.animu.finder.compose.repository.SubtitleRepository
-import fr.vinarnt.animu.finder.compose.service.SettingManager
 import kotlin.math.roundToInt
-import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 /**
  * Renders soft subtitles (WebVTT) fetched from [SubtitleTrack.url] as a timed,
@@ -57,29 +50,9 @@ fun SubtitleOverlay(
     currentTime: Float,
     modifier: Modifier = Modifier,
 ) {
-    val repository = koinInject<SubtitleRepository>()
-    val settings = koinInject<SettingManager>()
-    val scope = rememberCoroutineScope()
-
-    val softUrl = subtitles
-        .firstOrNull { it.type == SubtitleType.Soft && !it.url.isNullOrBlank() }
-        ?.url
-
-    var cues by remember { mutableStateOf<List<SubtitleCue>>(emptyList()) }
-    var position by remember { mutableStateOf(SubtitlePosition()) }
-
-    LaunchedEffect(softUrl) {
-        cues = if (softUrl != null) repository.load(softUrl) else emptyList()
-    }
-
-    LaunchedEffect(Unit) {
-        position = settings.getSubtitlePosition()
-    }
-
-    val activeCue = remember(cues, currentTime) {
-        val positionMs = (currentTime * 1000).toLong()
-        cues.firstOrNull { positionMs in it.startMs until it.endMs }
-    }
+    val subtitleState = rememberSoftSubtitleState(subtitles, (currentTime * 1000).toLong())
+    val activeCue = subtitleState.activeCue
+    val position = subtitleState.position
 
     val density = LocalDensity.current
     val controlBarHeightPx = with(density) { ControlBarHeight.toPx() }
@@ -169,17 +142,19 @@ fun SubtitleOverlay(
                                 nodeTop = newTop
                                 // Store the text CENTER as a fraction of the player, which is how
                                 // the position is interpreted when rendering.
-                                position = SubtitlePosition(
-                                    x = if (currentPlayerW > 0f)
-                                        (newLeft + currentTextW / 2f) / currentPlayerW
-                                    else currentPosition.x,
-                                    y = if (currentPlayerH > 0f)
-                                        (newTop + currentTextH / 2f) / currentPlayerH
-                                    else currentPosition.y,
+                                subtitleState.movePosition(
+                                    SubtitlePosition(
+                                        x = if (currentPlayerW > 0f)
+                                            (newLeft + currentTextW / 2f) / currentPlayerW
+                                        else currentPosition.x,
+                                        y = if (currentPlayerH > 0f)
+                                            (newTop + currentTextH / 2f) / currentPlayerH
+                                        else currentPosition.y,
+                                    )
                                 )
                             }
                             if (dragged) {
-                                scope.launch { settings.setSubtitlePosition(position) }
+                                subtitleState.commitPosition()
                             }
                         }
                     },

@@ -17,6 +17,9 @@ import io.ktor.http.isSuccess
 class CloudflareChallengeException(val url: String) :
     Exception("Blocked by anti-bot challenge: $url")
 
+class HttpStatusException(url: String, status: Int) :
+    Exception("HTTP $status for $url")
+
 const val DEFAULT_USER_AGENT =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 
@@ -76,7 +79,7 @@ open class ProviderHttpClient(
             }
         }
 
-        check(response.status.isSuccess()) { "HTTP ${response.status.value} for $url" }
+        if (!response.status.isSuccess()) throw HttpStatusException(url, response.status.value)
 
         val text = response.bodyAsText()
         if (isChallengePage(text)) throw CloudflareChallengeException(url)
