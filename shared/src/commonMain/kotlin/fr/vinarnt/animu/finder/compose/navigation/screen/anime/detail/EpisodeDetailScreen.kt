@@ -23,18 +23,16 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import fr.vinarnt.animu.finder.compose.model.ContinueWatchingEntry
+import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.model.StreamSource
 import fr.vinarnt.animu.finder.compose.repository.provider.EpisodeRef
 import fr.vinarnt.animu.finder.compose.repository.provider.EpisodeSearchQuery
-import fr.vinarnt.animu.finder.compose.service.SettingManager
 import fr.vinarnt.animu.finder.compose.ui.component.anime.detail.EpisodeDetailLayout
 import fr.vinarnt.animu.finder.compose.ui.component.base.layout.MainLayout
 import fr.vinarnt.animu.finder.compose.ui.component.navigation.bar.NavigationBar
 import fr.vinarnt.animu.finder.compose.ui.component.player.PlayerFullscreenEffect
 import fr.vinarnt.animu.finder.compose.ui.component.player.StreamingVideoPlayer
 import fr.vinarnt.animu.finder.compose.viewmodel.EpisodeDetailViewModel
-import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 class EpisodeDetailScreen(
@@ -50,12 +48,12 @@ class EpisodeDetailScreen(
     @Composable
     override fun Content() {
         val vm: EpisodeDetailViewModel = koinViewModel(key = "episode:$animeId:$episodeNumber")
-        val settingManager = koinInject<SettingManager>()
         val episode by vm.episode.collectAsStateWithLifecycle()
         val streams by vm.streams.collectAsStateWithLifecycle()
         val selectedStream by vm.selectedStream.collectAsStateWithLifecycle()
         val loadingStreams by vm.loadingStreams.collectAsStateWithLifecycle()
         val nextEpisode by vm.nextEpisode.collectAsStateWithLifecycle()
+        val episodeList by vm.episodeList.collectAsStateWithLifecycle()
 
         var isFullscreen by remember { mutableStateOf(false) }
         val stream = selectedStream
@@ -73,6 +71,7 @@ class EpisodeDetailScreen(
         LaunchedEffect(animeId, episodeNumber) {
             vm.loadEpisode(animeId, episodeNumber)
             vm.loadNextEpisode(animeId, episodeNumber + 1)
+            vm.loadEpisodeList(animeId)
             vm.loadStreams(
                 EpisodeSearchQuery(
                     animeTitle = animeTitle,
@@ -81,18 +80,18 @@ class EpisodeDetailScreen(
                     totalEpisodes = totalEpisodes,
                 )
             )
-            settingManager.addContinueWatching(
-                ContinueWatchingEntry(
-                    animeId = animeId,
-                    episodeNumber = episodeNumber,
-                )
-            )
+            vm.addToContinueWatching(animeId, episodeNumber)
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
             MainLayout(
                 topBar = {
-                    NavigationBar(title = "Episode $episodeNumber")
+                    NavigationBar(
+                        title = strings.episodeDetail.episodeNumber.replace(
+                            "{number}",
+                            episodeNumber.toString(),
+                        )
+                    )
                 },
                 scrollable = false
             ) {
@@ -103,7 +102,19 @@ class EpisodeDetailScreen(
                     selectedStream = selectedStream,
                     loadingStreams = loadingStreams,
                     nextEpisode = nextEpisode,
+                    episodes = episodeList,
                     onSelectStream = vm::selectStream,
+                    onSelectEpisode = { number ->
+                        navigator.replace(
+                            EpisodeDetailScreen(
+                                animeId = animeId,
+                                episodeNumber = number,
+                                animeTitle = animeTitle,
+                                altTitles = altTitles,
+                                totalEpisodes = totalEpisodes,
+                            )
+                        )
+                    },
                     isFullscreen = isFullscreen,
                     playerContent = {
                         if (stream != null) {

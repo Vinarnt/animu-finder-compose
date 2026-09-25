@@ -1,5 +1,6 @@
 package fr.vinarnt.animu.finder.compose.ui.component.anime.detail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -34,6 +35,7 @@ import fr.vinarnt.animu.finder.compose.ui.theme.CornerRadius
 import fr.vinarnt.animu.finder.compose.ui.theme.Elevation
 import fr.vinarnt.animu.finder.compose.ui.theme.Size
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
+import fr.vinarnt.animu.finder.compose.util.platformImageUrl
 import fr.vinarnt.jikan4k.models.GetAnimeByIdEpisodes200ResponseDataInner
 
 @Composable
@@ -41,6 +43,7 @@ fun EpisodeItemDesignPoster(
     episode: GetAnimeByIdEpisodes200ResponseDataInner,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
+    isActive: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -57,7 +60,8 @@ fun EpisodeItemDesignPoster(
         } else {
             MaterialTheme.colorScheme.surfaceContainerLow
         },
-        tonalElevation = if (isHovered) Elevation.md else Elevation.sm
+        tonalElevation = if (isHovered) Elevation.md else Elevation.sm,
+        border = if (isActive) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
         Row(
             modifier = Modifier
@@ -77,7 +81,7 @@ fun EpisodeItemDesignPoster(
                     .align(Alignment.CenterVertically),
                 contentAlignment = Alignment.TopStart
             ) {
-                val imageUrl = episode.images?.jpg?.imageUrl
+                val imageUrl = platformImageUrl(episode.images?.jpg?.imageUrl)
                 if (imageUrl != null) {
                     AsyncImage(
                         model = imageUrl,
@@ -108,7 +112,7 @@ fun EpisodeItemDesignPoster(
                 verticalArrangement = Arrangement.spacedBy(Spacing.xs)
             ) {
                 Text(
-                    text = episode.title ?: "Episode ${episode.malId ?: "?"}",
+                    text = episode.title ?: s.episodeTitleFallback(episode.malId ?: 0),
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -152,18 +156,36 @@ fun EpisodeItemDesignPoster(
                     }
                 }
             }
-            episode.score?.let { score ->
-                Surface(
-                    shape = RoundedCornerShape(CornerRadius.sm),
-                    color = MaterialTheme.colorScheme.secondaryContainer
-                ) {
-                    Text(
-                        text = score.toString(),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.sm)
-                    )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(Spacing.xs)
+            ) {
+                if (isActive) {
+                    Surface(
+                        shape = RoundedCornerShape(percent = 50),
+                        color = MaterialTheme.colorScheme.primary
+                    ) {
+                        Text(
+                            text = s.nowPlaying,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs)
+                        )
+                    }
+                }
+                episode.score?.let { score ->
+                    Surface(
+                        shape = RoundedCornerShape(CornerRadius.sm),
+                        color = MaterialTheme.colorScheme.secondaryContainer
+                    ) {
+                        Text(
+                            text = score.toString(),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.sm)
+                        )
+                    }
                 }
             }
         }

@@ -1,5 +1,6 @@
 package fr.vinarnt.animu.finder.compose.ui.component.anime.detail
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -38,6 +39,7 @@ fun EpisodeItemDesignMinimal(
     episode: GetAnimeByIdEpisodes200ResponseDataInner,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
+    isActive: Boolean = false,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -54,7 +56,8 @@ fun EpisodeItemDesignMinimal(
         } else {
             MaterialTheme.colorScheme.surfaceContainerLow
         },
-        tonalElevation = if (isHovered) Elevation.md else Elevation.sm
+        tonalElevation = if (isHovered) Elevation.md else Elevation.sm,
+        border = if (isActive) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
         Row(
             modifier = Modifier
@@ -71,7 +74,11 @@ fun EpisodeItemDesignMinimal(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primaryContainer
+                    color = if (isActive) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.primaryContainer
+                    }
                 ) {
                     Box(
                         modifier = Modifier.size(Size.Icon.sm * 3),
@@ -80,7 +87,11 @@ fun EpisodeItemDesignMinimal(
                         Text(
                             text = "${episode.malId ?: "?"}",
                             style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = if (isActive) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            },
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -91,7 +102,7 @@ fun EpisodeItemDesignMinimal(
                 verticalArrangement = Arrangement.spacedBy(Spacing.xs)
             ) {
                 Text(
-                    text = episode.title ?: "Episode ${episode.malId ?: "?"}",
+                    text = episode.title ?: s.episodeTitleFallback(episode.malId ?: 0),
                     style = MaterialTheme.typography.titleSmall,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -121,6 +132,20 @@ fun EpisodeItemDesignMinimal(
                             Text(text = s.recap, style = MaterialTheme.typography.labelSmall)
                         }
                     }
+                }
+            }
+            if (isActive) {
+                Surface(
+                    shape = RoundedCornerShape(percent = 50),
+                    color = MaterialTheme.colorScheme.primary
+                ) {
+                    Text(
+                        text = s.nowPlaying,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = Spacing.sm, vertical = Spacing.xs)
+                    )
                 }
             }
             episode.score?.let { score ->

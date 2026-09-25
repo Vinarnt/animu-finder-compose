@@ -47,7 +47,7 @@ fun EpisodeDisplaySelector(
                         }
                     )
                     .clickable { onSelect(option) }
-                    .size(40.dp)
+                    .size(44.dp)
                     .padding(Spacing.xs),
                 contentAlignment = Alignment.Center
             ) {
@@ -108,6 +108,34 @@ private fun EpisodeDisplayPreview(
                     .height(18.dp)
                     .background(tint, RoundedCornerShape(3.dp))
             )
+            Box(
+                modifier = Modifier
+                    .width(24.dp)
+                    .height(3.dp)
+                    .background(muted, RoundedCornerShape(1.dp))
+            )
+        }
+
+        EpisodeDisplay.GRID -> Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(14.dp)
+                        .height(14.dp)
+                        .background(tint, RoundedCornerShape(2.dp))
+                )
+                Box(
+                    modifier = Modifier
+                        .width(14.dp)
+                        .height(14.dp)
+                        .background(muted, RoundedCornerShape(2.dp))
+                )
+            }
             Box(
                 modifier = Modifier
                     .width(24.dp)
