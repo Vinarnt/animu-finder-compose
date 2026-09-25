@@ -61,8 +61,22 @@ class SettingManager(val settings: FlowSettings) {
         settings.putString("watchHistory", json.encodeToString(updated))
     }
 
+    fun getMyList(): Flow<List<Int>> =
+        settings.getStringFlow("myList", "[]")
+            .map { decodeIntList(it) }
+
+    suspend fun toggleMyList(animeId: Int) {
+        val current = getMyList().first()
+        val updated = if (animeId in current) current - animeId else current + animeId
+        settings.putString("myList", json.encodeToString(updated))
+    }
+
     private fun decode(value: String): List<ContinueWatchingEntry> =
         runCatching { json.decodeFromString<List<ContinueWatchingEntry>>(value) }
+            .getOrElse { emptyList() }
+
+    private fun decodeIntList(value: String): List<Int> =
+        runCatching { json.decodeFromString<List<Int>>(value) }
             .getOrElse { emptyList() }
 
     private fun decodeSubtitlePosition(value: String): SubtitlePosition =

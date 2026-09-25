@@ -19,6 +19,10 @@ import fr.vinarnt.animu.finder.compose.service.ContinueWatchingCache
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeDetailViewModel
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeListViewModel
 import fr.vinarnt.animu.finder.compose.viewmodel.EpisodeDetailViewModel
+import fr.vinarnt.animu.finder.compose.viewmodel.HomeShelvesViewModel
+import fr.vinarnt.animu.finder.compose.viewmodel.MyListViewModel
+import fr.vinarnt.animu.finder.compose.viewmodel.SettingsViewModel
+import fr.vinarnt.animu.finder.compose.viewmodel.SubtitleViewModel
 import fr.vinarnt.jikan4k.JikanClient
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
@@ -52,8 +56,12 @@ private val commonModule = module {
     }
 
     viewModelOf(::AnimeListViewModel)
+    viewModelOf(::HomeShelvesViewModel)
+    viewModelOf(::MyListViewModel)
     viewModelOf(::AnimeDetailViewModel)
     viewModelOf(::EpisodeDetailViewModel)
+    viewModelOf(::SettingsViewModel)
+    viewModelOf(::SubtitleViewModel)
 
     singleOf(::AnimeRepository)
     singleOf(::SubtitleRepository)

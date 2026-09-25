@@ -3,6 +3,7 @@ package fr.vinarnt.animu.finder.compose.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import fr.vinarnt.animu.finder.compose.model.ContinueWatchingEntry
 import fr.vinarnt.animu.finder.compose.model.EpisodeDisplay
 import fr.vinarnt.animu.finder.compose.repository.AnimeRepository
 import fr.vinarnt.animu.finder.compose.service.SettingManager
@@ -26,6 +27,17 @@ class AnimeDetailViewModel(
 
     val episodeDisplay: StateFlow<EpisodeDisplay> = settingManager.getEpisodeDisplay()
         .stateIn(viewModelScope, SharingStarted.Eagerly, EpisodeDisplay.POSTER)
+
+    val myList: StateFlow<List<Int>> = settingManager.getMyList()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val watchHistory: StateFlow<List<ContinueWatchingEntry>> = settingManager.getWatchHistory()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun toggleMyList() {
+        val malId = _anime.value?.malId ?: return
+        viewModelScope.launch { settingManager.toggleMyList(malId) }
+    }
 
     private val _episodesPaginationState = MutableStateFlow(createEpisodesPaginationState(-1))
     val episodesPaginationState: StateFlow<PaginationState<Int, GetAnimeByIdEpisodes200ResponseDataInner>> =

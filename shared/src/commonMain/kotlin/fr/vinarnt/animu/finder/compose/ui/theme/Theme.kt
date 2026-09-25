@@ -5,10 +5,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import fr.vinarnt.animu.finder.compose.service.SettingManager
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import kotlinx.serialization.Serializable
-import org.koin.compose.koinInject
 
 @Serializable
 enum class Theme() {
@@ -93,20 +92,25 @@ private val darkScheme = darkColorScheme(
 
 @Composable
 fun AppTheme(
+    theme: Theme,
     content: @Composable () -> Unit
 ) {
-    val settingManager = koinInject<SettingManager>()
-    val theme = settingManager.getTheme().collectAsStateWithLifecycle(Theme.AUTO)
-
     MaterialTheme(
-        colorScheme = when (theme.value) {
+        colorScheme = when (theme) {
             Theme.AUTO -> if (isSystemInDarkTheme()) darkScheme else lightScheme
             Theme.LIGHT -> lightScheme
             Theme.DARK -> darkScheme
         },
         shapes = AppShape,
-        typography = AppTypography,
+        typography = appTypography(),
         content = content
     )
 }
+
+@Composable
+fun isAppInDarkTheme(): Boolean = MaterialTheme.colorScheme.background.luminance() < 0.5f
+
+@Composable
+fun appBarGlassColor(): Color =
+    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = if (isAppInDarkTheme()) 0.8f else 0.86f)
 

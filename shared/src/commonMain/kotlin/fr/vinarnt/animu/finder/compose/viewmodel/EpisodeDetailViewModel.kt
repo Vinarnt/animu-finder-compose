@@ -3,13 +3,16 @@ package fr.vinarnt.animu.finder.compose.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import fr.vinarnt.animu.finder.compose.model.ContinueWatchingEntry
 import fr.vinarnt.animu.finder.compose.model.StreamPlayability
 import fr.vinarnt.animu.finder.compose.model.StreamSource
 import fr.vinarnt.animu.finder.compose.model.currentStreamPlatform
 import fr.vinarnt.animu.finder.compose.repository.AnimeRepository
 import fr.vinarnt.animu.finder.compose.repository.provider.EpisodeSearchQuery
 import fr.vinarnt.animu.finder.compose.repository.provider.StreamRepository
+import fr.vinarnt.animu.finder.compose.service.SettingManager
 import fr.vinarnt.jikan4k.models.GetAnimeByIdEpisodesByEpisodeId200ResponseData
+import fr.vinarnt.jikan4k.models.GetAnimeByIdEpisodes200ResponseDataInner
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +22,7 @@ import kotlinx.coroutines.launch
 class EpisodeDetailViewModel(
     private val animeRepository: AnimeRepository,
     private val streamRepository: StreamRepository,
+    private val settingManager: SettingManager,
 ) : ViewModel() {
 
     private val _episode = MutableStateFlow<GetAnimeByIdEpisodesByEpisodeId200ResponseData?>(null)
@@ -35,6 +39,9 @@ class EpisodeDetailViewModel(
 
     private val _nextEpisode = MutableStateFlow<GetAnimeByIdEpisodesByEpisodeId200ResponseData?>(null)
     val nextEpisode: StateFlow<GetAnimeByIdEpisodesByEpisodeId200ResponseData?> = _nextEpisode.asStateFlow()
+
+    private val _episodeList = MutableStateFlow<List<GetAnimeByIdEpisodes200ResponseDataInner>>(emptyList())
+    val episodeList: StateFlow<List<GetAnimeByIdEpisodes200ResponseDataInner>> = _episodeList.asStateFlow()
 
     private var episodeLoadGeneration = 0
     private var nextEpisodeLoadGeneration = 0
@@ -97,5 +104,26 @@ class EpisodeDetailViewModel(
 
     fun selectStream(source: StreamSource) {
         _selectedStream.value = source
+    }
+
+    /** Records this episode as the latest watched progress for the title. */
+    fun addToContinueWatching(animeId: Int, episodeNumber: Int) {
+        viewModelScope.launch {
+            settingManager.addContinueWatching(
+                ContinueWatchingEntry(animeId = animeId, episodeNumber = episodeNumber)
+            )
+        }
+    }
+
+    /** Loads the full episode list so the episode shelf can switch between episodes. */
+    fun loadEpisodeList(animeId: Int) {
+        viewModelScope.launch {
+            try {
+                val page = animeRepository.getAnimeEpisodes(animeId, 1)
+                _episodeList.value = page.data
+            } catch (e: Exception) {
+                Logger.w("Failed to load episode list: ${e.message}", e)
+            }
+        }
     }
 }

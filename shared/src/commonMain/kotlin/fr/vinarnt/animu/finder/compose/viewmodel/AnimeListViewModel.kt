@@ -34,7 +34,9 @@ data class AnimeSearchFilters(
     val type: AnimeApi.TypeGetAnime? = null,
     val status: AnimeApi.StatusGetAnime? = null,
     val rating: AnimeApi.RatingGetAnime? = null,
-    val genres: Set<AnimeGenre> = emptySet()
+    val genres: Set<AnimeGenre> = emptySet(),
+    val orderBy: AnimeApi.OrderByGetAnime = AnimeApi.OrderByGetAnime.SCORE,
+    val sort: AnimeApi.SortGetAnime = AnimeApi.SortGetAnime.DESC,
 )
 
 class AnimeListViewModel(
@@ -49,16 +51,22 @@ class AnimeListViewModel(
     private val _paginationState = MutableStateFlow(createPaginationState(AnimeSearchFilters()))
     val paginationState: StateFlow<PaginationState<Int, GetAnime200ResponseDataInner>> = _paginationState.asStateFlow()
 
-    val continueWatching: StateFlow<List<ContinueWatchingEntry>> =
-        settingManager.getWatchHistory()
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
     private val _resumeItems = MutableStateFlow<List<ContinueWatchingItem>>(emptyList())
     val resumeItems: StateFlow<List<ContinueWatchingItem>> = _resumeItems.asStateFlow()
 
+    val myList: StateFlow<List<Int>> = settingManager.getMyList()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun toggleMyList(animeId: Int) {
+        viewModelScope.launch { settingManager.toggleMyList(animeId) }
+    }
+
     init {
         viewModelScope.launch {
-            continueWatching.collect { entries ->
+            // Collect the watch-history source flow directly. Deriving resume items from a
+            // stateIn() StateFlow would first observe its empty placeholder, pruning the cache
+            // to {} before it is ever read.
+            settingManager.getWatchHistory().collect { entries ->
                 continueWatchingCache.prune(entries.map { it.animeId }.toSet())
                 val items = entries.take(MAX_RESUME).map {
                     ContinueWatchingItem(it, continueWatchingCache.get(it.animeId))
@@ -87,6 +95,18 @@ class AnimeListViewModel(
 
     fun updateQuery(text: String) {
         _filters.value = _filters.value.copy(queryText = text)
+    }
+
+    fun setOrderBy(orderBy: AnimeApi.OrderByGetAnime) {
+        applyFilters(_filters.value.copy(orderBy = orderBy))
+    }
+
+    fun setSort(sort: AnimeApi.SortGetAnime) {
+        applyFilters(_filters.value.copy(sort = sort))
+    }
+
+    fun initializeFilters(initial: AnimeSearchFilters) {
+        applyFilters(initial)
     }
 
     fun updateType(type: AnimeApi.TypeGetAnime?) {
@@ -138,7 +158,9 @@ class AnimeListViewModel(
                     rating = fetchFilters.rating,
                     minScore = fetchFilters.scoreRange.start.takeIf { it > 1f }?.toDouble(),
                     maxScore = fetchFilters.scoreRange.endInclusive.takeIf { it < 10f }?.toDouble(),
-                    genres = fetchFilters.genres
+                    genres = fetchFilters.genres,
+                    orderBy = fetchFilters.orderBy,
+                    sort = fetchFilters.sort
                 ).let {
                     state.appendPage(
                         items = it.data,
