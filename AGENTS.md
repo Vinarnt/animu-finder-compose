@@ -57,18 +57,21 @@ There are no tests in this project.
 
 ## Design System
 
-All spacing, sizing, corner radius, and elevation values are defined as token objects in `ui/theme/` (`Spacing.kt`, `Size.kt`, `CornerRadius.kt`, `Elevation.kt`):
+All spacing, sizing, corner radius, elevation, and responsive breakpoint values are defined as token objects in `ui/theme/` (`Spacing.kt`, `Size.kt`, `CornerRadius.kt`, `Elevation.kt`, `Breakpoints.kt`):
 
 ```kotlin
 object Spacing   { xs, sm, md, lg }
 object Size      { iconSm, progressSm, progressMd, imageCollapsed, imageExpanded, maxContentWidth }
 object CornerRadius { sm, md }
 object Elevation { sm, md, lg }
+object Breakpoints { compactMaxWidth, tabletMaxWidth }
 ```
+
+`Breakpoints` holds the responsive window-width thresholds (`compactMaxWidth` = 760dp, `tabletMaxWidth` = 1024dp). Compare against `BoxWithConstraints` `maxWidth` (`val compact = maxWidth < Breakpoints.compactMaxWidth`) instead of hard-coding widths.
 
 `Shape.kt` applies `CornerRadius` tokens globally to the M3 `Shapes` theme, so components inherit rounded corners without explicit `shape` parameters.
 
-`seamlessInputColors()` in `InputStyle.kt` — shared `TextFieldColors` that blends `TextField` into a `surfaceContainerHighest` surface (transparent indicators, matching container color). Always use this for `TextField` and `SearchDropdown`.
+`seamlessInputColors()` in `InputStyle.kt` — shared `TextFieldColors` that blends `TextField` into a `surfaceContainerHighest` surface (transparent indicators, matching container color). Always use this for `TextField`.
 
 ## Key Dependency Versions
 
@@ -97,3 +100,14 @@ The following are enabled project-wide in `build.gradle.kts` and can be used wit
 
 - Desktop JVM targets JVM 17 (`jvm("desktop")` in `shared`; `desktopApp` is a plain JVM 17 module).
 - Android targets JVM 11 (configured via `kotlin.androidLibrary.compilerOptions` in `shared` and `kotlin.target.compilerOptions` in `androidApp`).
+
+## Design source of truth = OpenDesign
+
+The app's design (handoff spec + interactive prototype) lives in **OpenDesign**, NOT in this repo. Access it through the `open-design` MCP (daemon at `127.0.0.1:7456`):
+
+- **Project:** `Animu Finder` (id `animu-finder`)
+- **Design spec:** `design/DESIGN.md` — the handoff contract. Pins both color schemes (light/dark), Inter typography, shapes, layout gutters, the component map (prototype → composable file), and behavioral rules (on-image dark-glass CTAs, banner bottom fade, motion/reduced-motion, 44px touch targets, empty/loading states, keyboard operability).
+- **Prototype:** `animu-finder-v2.html` — the interactive HTML prototype (Home hero + shelves, Browse search/filters, per-title Detail, Episode player + shelf, My List, Settings). Authoritative visual reference: when a screen changes here, port the change per the component map in `design/DESIGN.md`.
+- Read with `get_file` / `get_artifact` (project defaults to `animu-finder`); locate strings/classes with `search_files`; edit via `write_file`.
+- `ui/theme/Color.kt` (and `Type.kt`/`Shape.kt`) must be aligned to the schemes in `design/DESIGN.md` — that file is the token contract, not the legacy mockup.
+- The legacy extraction mockup `design/mockups/layout-mockups.html` is archived; do not treat it as current.

@@ -19,7 +19,9 @@ class AnimeRepository(private val jikan: JikanClient) {
         rating: AnimeApi.RatingGetAnime? = null,
         minScore: Double? = null,
         maxScore: Double? = null,
-        genres: Set<AnimeGenre> = emptySet()
+        genres: Set<AnimeGenre> = emptySet(),
+        orderBy: AnimeApi.OrderByGetAnime = AnimeApi.OrderByGetAnime.SCORE,
+        sort: AnimeApi.SortGetAnime = AnimeApi.SortGetAnime.DESC,
     ): GetAnime200Response = jikan.animes.getAnime(
         q = query?.takeIf { it.isNotBlank() },
         page = page,
@@ -30,8 +32,8 @@ class AnimeRepository(private val jikan: JikanClient) {
         minScore = minScore,
         maxScore = maxScore,
         genres = genres.joinToString(",") { it.id.toString() }.takeIf { it.isNotEmpty() },
-        orderBy = AnimeApi.OrderByGetAnime.SCORE,
-        sort = AnimeApi.SortGetAnime.DESC
+        orderBy = orderBy,
+        sort = sort
     ).body()
 
     suspend fun getAnimeById(id: Int): GetAnimeById200ResponseData =

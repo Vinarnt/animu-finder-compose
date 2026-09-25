@@ -11,10 +11,35 @@ private val languages = mapOf(
 @LyricistStrings(languageTag = Locales.EN, default = true)
 val EnStrings = Strings(
     navigation = NavigationStrings(
-        back = "Back"
+        back = "Back",
+        home = "Home",
+        appName = "Animu Finder"
     ), home = HomeStrings(
         continueWatching = "Continue watching",
-        resume = "Resume"
+        episodeBadge = { n -> "EP $n" },
+        featured = "Featured",
+        trending = "Trending now",
+        newEpisodes = "New episodes",
+        topRated = "Top rated",
+        action = "Action",
+        fantasy = "Fantasy",
+        browsePanelSubtitle = "Search and filter by type, status, genre and score",
+        browsePanelOpen = "Open ›"
+    ), common = CommonStrings(
+        unknown = "Unknown",
+        retry = "Retry",
+        seeAll = "See all ›",
+        scrollLeft = "Scroll left",
+        scrollRight = "Scroll right",
+        synopsis = "Synopsis",
+        score = "Score"
+    ), myList = MyListStrings(
+        title = "My List",
+        emptyTitle = "Your list is empty",
+        emptyHint = "Open any title and tap \"Add to My List\" to save it here.",
+        browseAnime = "Browse anime",
+        addLabel = "Add to My List",
+        addedLabel = "Added to My List"
     ), ui = UIStrings(
         dropdown = DropdownStrings(
             search = "Search", noContent = "No item matching"
@@ -28,10 +53,16 @@ val EnStrings = Strings(
             label = "Language"
         ),
         appearance = "Appearance",
+        general = "General",
         playback = "Playback",
         defaultQuality = "Default quality",
         preferredSubtitles = "Preferred subtitles",
-        autoplayNext = "Autoplay next episode"
+        autoplayNext = "Autoplay next episode",
+        qualityAuto = "Auto",
+        subtitleLanguageEnglish = "English",
+        subtitleLanguageFrench = "French",
+        subtitleLanguageJapanese = "Japanese",
+        subtitleLanguageNone = "None"
     ), languages = LanguagesStrings(
         locales = languages.keys.toList(),
         localeLabels = languages,
@@ -40,7 +71,6 @@ val EnStrings = Strings(
         typeLabel = "Type",
         statusLabel = "Status",
         ratingLabel = "Rating",
-        scoreLabel = "Score",
         all = "All",
         typeLabels = mapOf(
             AnimeApi.TypeGetAnime.TV to "TV",
@@ -68,6 +98,15 @@ val EnStrings = Strings(
         ),
         genreLabel = "Genre",
         genreCount = { n -> "$n genres" },
+        browseTitle = "Browse all anime",
+        clearFilters = "Clear filters",
+        emptyTitle = "No anime match",
+        emptyHint = "Try a different title or loosen your filters.",
+        resultCount = { n -> if (n == 1) "1 result" else "$n results" },
+        sortLabel = "Sort",
+        sortNewest = "Newest",
+        sortOldest = "Oldest",
+        sortAlphabetical = "A-Z",
         genreNames = mapOf(
             AnimeGenre.ACTION to "Action",
             AnimeGenre.ADVENTURE to "Adventure",
@@ -103,44 +142,36 @@ val EnStrings = Strings(
         )
     ),
     animeDetail = AnimeDetailStrings(
-        episodesDescription = "Number of episodes",
-        scoreDescription = "Average score out of 10",
-        rankDescription = "Rank by score",
-        popularityDescription = "Rank by popularity",
-        membersDescription = "Number of members",
         studiosDescription = "Production studios",
         airedDescription = "Start airing date",
         statusDescription = "Airing status",
-        synopsisLabel = "Synopsis",
         episodesLabel = "Episodes"
     ),
     episodeDetail = EpisodeDetailStrings(
         alternativeTitles = "Alternative titles",
         airingDate = "Airing date",
-        synopsis = "Synopsis",
         streams = "Available streams",
         loadingStreams = "Loading…",
         noStreams = "No stream found",
-        couldNotLoadStreams = "Could not load streams",
         noSource = "No source selected",
         dub = "DUB",
         sub = "SUB",
         upNext = "Up next",
         nextEpisode = "Next episode",
+        nowPlaying = "Now playing",
         filler = "Filler",
         recap = "Recap",
-        score = "Score",
-        episodeNumber = "Episode {number}"
+        episodeNumber = "Episode {number}",
+        episodeShort = "Ep {number}",
+        episodeTitleFallback = { number -> "Episode $number" }
     ),
     player = PlayerStrings(
         play = "Play",
         pause = "Pause",
         fullscreen = "Enter fullscreen",
         exitFullscreen = "Exit fullscreen",
-        speed = "Playback speed",
         audio = "Audio track",
-        error = "Playback error",
-        retry = "Retry"
+        error = "Playback error"
     )
 )
 

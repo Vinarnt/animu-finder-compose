@@ -13,15 +13,47 @@ data class Strings(
     val animeDetail: AnimeDetailStrings,
     val episodeDetail: EpisodeDetailStrings,
     val player: PlayerStrings,
+    val myList: MyListStrings,
+    val common: CommonStrings,
 )
 
 data class NavigationStrings(
-    val back: String
+    val back: String,
+    val home: String,
+    val appName: String
 )
 
 data class HomeStrings(
     val continueWatching: String,
-    val resume: String
+    val episodeBadge: (Int) -> String,
+    val featured: String,
+    val trending: String,
+    val newEpisodes: String,
+    val topRated: String,
+    val action: String,
+    val fantasy: String,
+    val browsePanelSubtitle: String,
+    val browsePanelOpen: String
+)
+
+/** Shared chrome copy reused across screens. */
+data class CommonStrings(
+    val unknown: String,
+    val retry: String,
+    val seeAll: String,
+    val scrollLeft: String,
+    val scrollRight: String,
+    val synopsis: String,
+    val score: String
+)
+
+data class MyListStrings(
+    val title: String,
+    val emptyTitle: String,
+    val emptyHint: String,
+    val browseAnime: String,
+    val addLabel: String,
+    val addedLabel: String
 )
 
 data class SettingStrings(
@@ -29,10 +61,16 @@ data class SettingStrings(
     val theme: SettingThemeStrings,
     val locale: SettingLocaleStrings,
     val appearance: String,
+    val general: String,
     val playback: String,
     val defaultQuality: String,
     val preferredSubtitles: String,
-    val autoplayNext: String
+    val autoplayNext: String,
+    val qualityAuto: String,
+    val subtitleLanguageEnglish: String,
+    val subtitleLanguageFrench: String,
+    val subtitleLanguageJapanese: String,
+    val subtitleLanguageNone: String
 )
 
 data class SettingThemeStrings(
@@ -66,35 +104,29 @@ data class DropdownStrings(
 )
 
 data class AnimeDetailStrings(
-    val episodesDescription: String,
-    val scoreDescription: String,
-    val rankDescription: String,
-    val popularityDescription: String,
-    val membersDescription: String,
     val studiosDescription: String,
     val airedDescription: String,
     val statusDescription: String,
-    val synopsisLabel: String,
     val episodesLabel: String
 )
 
 data class EpisodeDetailStrings(
     val alternativeTitles: String,
     val airingDate: String,
-    val synopsis: String,
     val streams: String,
     val loadingStreams: String,
     val noStreams: String,
-    val couldNotLoadStreams: String,
     val noSource: String,
     val dub: String,
     val sub: String,
     val upNext: String,
     val nextEpisode: String,
+    val nowPlaying: String,
     val filler: String,
     val recap: String,
-    val score: String,
-    val episodeNumber: String
+    val episodeNumber: String,
+    val episodeShort: String,
+    val episodeTitleFallback: (Int) -> String
 )
 
 data class PlayerStrings(
@@ -102,10 +134,8 @@ data class PlayerStrings(
     val pause: String,
     val fullscreen: String,
     val exitFullscreen: String,
-    val speed: String,
     val audio: String,
-    val error: String,
-    val retry: String
+    val error: String
 )
 
 data class AnimeListStrings(
@@ -113,12 +143,20 @@ data class AnimeListStrings(
     val typeLabel: String,
     val statusLabel: String,
     val ratingLabel: String,
-    val scoreLabel: String,
     val all: String,
     val typeLabels: Map<AnimeApi.TypeGetAnime, String>,
     val statusLabels: Map<AnimeApi.StatusGetAnime, String>,
     val ratingLabels: Map<AnimeApi.RatingGetAnime, String>,
     val genreLabel: String,
     val genreCount: (Int) -> String,
-    val genreNames: Map<AnimeGenre, String>
+    val genreNames: Map<AnimeGenre, String>,
+    val browseTitle: String,
+    val clearFilters: String,
+    val emptyTitle: String,
+    val emptyHint: String,
+    val resultCount: (Int) -> String,
+    val sortLabel: String,
+    val sortNewest: String,
+    val sortOldest: String,
+    val sortAlphabetical: String
 )

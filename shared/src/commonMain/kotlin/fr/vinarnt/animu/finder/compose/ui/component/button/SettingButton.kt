@@ -2,8 +2,6 @@ package fr.vinarnt.animu.finder.compose.ui.component.button
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.runtime.Composable
@@ -14,7 +12,7 @@ import fr.vinarnt.animu.finder.compose.navigation.screen.setting.SettingScreen
 import fr.vinarnt.animu.finder.compose.ui.component.base.Tooltip
 
 @Composable
-fun SettingButton() {
+fun SettingButton(onGlass: Boolean = false) {
     val navigator = LocalNavigator.currentOrThrow
 
     Tooltip(
@@ -23,15 +21,13 @@ fun SettingButton() {
         },
         anchorPosition = TooltipAnchorPosition.Below,
     ) {
-        IconButton(
+        GlassIconButton(
+            imageVector = Icons.Default.Settings,
+            contentDescription = strings.settings.title,
             onClick = {
                 navigator += SettingScreen()
-            }
-        ) {
-            Icon(
-                Icons.Default.Settings,
-                strings.settings.title,
-            )
-        }
+            },
+            onGlass = onGlass,
+        )
     }
 }

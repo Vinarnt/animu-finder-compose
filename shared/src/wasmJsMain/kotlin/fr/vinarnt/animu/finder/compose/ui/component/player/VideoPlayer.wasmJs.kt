@@ -139,7 +139,7 @@ actual fun StreamingVideoPlayer(
         var triedNative by remember { mutableStateOf(!useHlsJs) }
 
         val playerErrorText = strings.player.error
-        val playerRetryText = strings.player.retry
+        val playerRetryText = strings.common.retry
         val dom = remember { buildDomNodes(playerErrorText, playerRetryText) }
 
         // Soft subtitles are external WebVTT files loaded by the shared subtitle
