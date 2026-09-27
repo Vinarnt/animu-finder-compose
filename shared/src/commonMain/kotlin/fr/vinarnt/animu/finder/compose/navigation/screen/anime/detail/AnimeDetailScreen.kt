@@ -53,6 +53,7 @@ class AnimeDetailScreen(private val malId: Int) : Screen {
                     SettingButton(onGlass = !scrolled)
                 }
             },
+            scrollable = false,
             overlayTopBar = true
         ) {
             if (anime == null) {
