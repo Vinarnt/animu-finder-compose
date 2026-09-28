@@ -26,7 +26,10 @@ import kotlin.math.roundToInt
 
 /** 16:9 episode thumbnail with a "#N" badge and a score overlay. */
 @Composable
-internal fun EpisodeGridThumbnail(episode: GetAnimeByIdEpisodes200ResponseDataInner) {
+internal fun EpisodeGridThumbnail(
+    episode: GetAnimeByIdEpisodes200ResponseDataInner,
+    fallbackImageUrl: String? = null,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -34,7 +37,8 @@ internal fun EpisodeGridThumbnail(episode: GetAnimeByIdEpisodes200ResponseDataIn
             .background(MaterialTheme.colorScheme.surfaceContainerHigh),
         contentAlignment = Alignment.TopStart
     ) {
-        val imageUrl = platformImageUrl(episode.images?.jpg?.imageUrl)
+        val imageUrl = episode.images?.jpg?.imageUrl?.let { platformImageUrl(it) }
+            ?: fallbackImageUrl
         if (imageUrl != null) {
             AsyncImage(
                 model = imageUrl,

@@ -38,6 +38,7 @@ internal fun EpisodePlayerSection(
     loadingStreams: Boolean,
     onSelectStream: (StreamSource) -> Unit,
     onPlayNext: (() -> Unit)?,
+    fallbackImageUrl: String? = null,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         val playerSection: @Composable () -> Unit = {
@@ -86,6 +87,7 @@ internal fun EpisodePlayerSection(
                         nextEpisode = nextEpisode,
                         nextEpisodeNumber = episodeNumber + 1,
                         onClick = onPlayNext,
+                        fallbackImageUrl = fallbackImageUrl,
                     )
                     StreamSourceList(
                         streams = streams,
@@ -105,6 +107,7 @@ internal fun EpisodePlayerSection(
                     nextEpisode = nextEpisode,
                     nextEpisodeNumber = episodeNumber + 1,
                     onClick = onPlayNext,
+                    fallbackImageUrl = fallbackImageUrl,
                 )
                 StreamSourceList(
                     streams = streams,

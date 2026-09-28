@@ -36,28 +36,32 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.layout.ContentScale
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.model.StreamSource
+import io.github.kdroidfilter.composemediaplayer.InitialPlayerState
+import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
+import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
+import io.github.kdroidfilter.composemediaplayer.rememberVideoPlayerState
 import kotlinx.coroutines.delay
-import org.openani.mediamp.MediaLoadCancellationException
-import org.openani.mediamp.PlaybackException
-import org.openani.mediamp.compose.MediampPlayerSurface
-import org.openani.mediamp.compose.rememberMediampPlayer
-import org.openani.mediamp.errorOrNull
-import org.openani.mediamp.isLoadingOrBuffering
-import org.openani.mediamp.source.UriMediaData
-import org.openani.mediamp.togglePlayWhenReady
 
 private const val SeekStepMillis = 10_000L
 
 /**
- * Streaming video player backed by MediaMP. One player instance per media URL:
- * the subtree is keyed on [StreamSource.url], so switching source builds a
- * fresh player. Renders the video surface plus a hand-built control bar.
+ * Streaming video player backed by ComposeMediaPlayer. One player instance per media
+ * URL: the subtree is keyed on [StreamSource.url], so switching source builds a fresh
+ * player. Renders the video surface plus a hand-built control bar.
  *
- * MediaMP only provides the bare video surface, so the controls are composed
- * here on top of it.
+ * ComposeMediaPlayer decodes natively (GStreamer on Linux, platform bridges elsewhere)
+ * but draws each frame into a Compose [androidx.compose.foundation.Canvas], so unlike
+ * mediamp's desktop backend it needs neither AWT/SkiaLayer nor the host window's Skia
+ * `DirectContext` — which is what lets it run inside a Nucleus Tao window.
+ *
+ * The library also has its own `toggleFullscreen()`; it is deliberately not used here.
+ * Its fullscreen overlay opens an `androidx.compose.ui.window.Window` (AWT), which Tao
+ * cannot host, and the Linux surface stops painting while `isFullscreen` is set. The
+ * app already drives fullscreen through [onFullscreenChange], so the player leaves
+ * `VideoPlayerState.isFullscreen` alone and lets the caller move the surface.
  */
 @Composable
 actual fun StreamingVideoPlayer(
@@ -67,36 +71,23 @@ actual fun StreamingVideoPlayer(
     onFullscreenChange: (Boolean) -> Unit,
 ) {
     key(source.url) {
-        val player = rememberMediampPlayer()
+        val player = rememberVideoPlayerState()
 
         val currentOnFullscreenChange by rememberUpdatedState(onFullscreenChange)
         val currentIsFullscreen by rememberUpdatedState(isFullscreen)
 
-        // Load the media paused (no autoplay). The player reports opening failures
-        // through player.state (MediaStatus.Error).
-        // The thrown exception only signals
-        // control flow, so swallow it.
-        LaunchedEffect(player, source.url, source.headers) {
-            try {
-                player.setMediaData(
-                    data = UriMediaData(source.url, source.headers),
-                    playWhenReady = false,
-                )
-            } catch (_: MediaLoadCancellationException) {
-                // Superseded by a newer load or the player was closed.
-            } catch (_: PlaybackException) {
-                // Handled via the error state below.
-            }
+        // Load the media paused (no autoplay). Playback failures surface through
+        // player.error below. Note: the native backends take a bare URI, so provider
+        // headers (Referer/User-Agent) cannot be forwarded yet.
+        LaunchedEffect(player, source.url) {
+            player.openUri(source.url, InitialPlayerState.PAUSE)
         }
 
-        val playerState by player.state.collectAsStateWithLifecycle()
-        val positionMs by player.currentPositionMillis.collectAsStateWithLifecycle()
-        val properties by player.mediaProperties.collectAsStateWithLifecycle()
-
-        val durationMs = properties?.durationMillis ?: 0L
-        val isPlaying = playerState.playWhenReady
-        val loading = playerState.isLoadingOrBuffering
-        val error = playerState.errorOrNull
+        val isPlaying = player.isPlaying
+        val loading = player.isLoading || (!player.hasMedia && player.error == null)
+        val error = player.error
+        val positionMs = (player.currentTime * 1000).toLong()
+        val durationMs = (player.duration * 1000).toLong()
 
         val interaction = remember { MutableInteractionSource() }
         val hovered by interaction.collectIsHoveredAsState()
@@ -129,15 +120,15 @@ actual fun StreamingVideoPlayer(
                     if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                     when (event.key) {
                         Key.Spacebar -> {
-                            player.togglePlayWhenReady()
+                            player.togglePlay(isPlaying)
                             true
                         }
                         Key.DirectionLeft -> {
-                            player.seekTo((positionMs - SeekStepMillis).coerceAtLeast(0L))
+                            player.seekToMillis(positionMs - SeekStepMillis)
                             true
                         }
                         Key.DirectionRight -> {
-                            player.seekTo((positionMs + SeekStepMillis).coerceAtMost(durationMs))
+                            player.seekToMillis(positionMs + SeekStepMillis)
                             true
                         }
                         Key.F -> {
@@ -148,9 +139,10 @@ actual fun StreamingVideoPlayer(
                     }
                 },
         ) {
-            MediampPlayerSurface(
-                mediampPlayer = player,
+            VideoPlayerSurface(
+                playerState = player,
                 modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
             )
 
             // Interaction overlay over the video area. The bottom strip is left for
@@ -165,7 +157,7 @@ actual fun StreamingVideoPlayer(
                     .pointerInput(Unit) {
                         detectTapGestures(
                             onTap = {
-                                player.togglePlayWhenReady()
+                                player.togglePlay(isPlaying)
                                 controlsVisible = true
                             },
                             onDoubleTap = { currentOnFullscreenChange(!currentIsFullscreen) },
@@ -203,17 +195,29 @@ actual fun StreamingVideoPlayer(
             ) {
                 PlayerControlBar(
                     player = player,
-                    positionMs = positionMs,
-                    durationMs = durationMs,
                     isPlaying = isPlaying,
                     isFullscreen = isFullscreen,
-                    showAudioSelector = source.supportsAudioTrackSelection,
-                    onTogglePlayPause = { player.togglePlayWhenReady() },
-                    onSeek = { player.seekTo(it) },
+                    onTogglePlayPause = { player.togglePlay(isPlaying) },
                     onToggleFullscreen = { currentOnFullscreenChange(!currentIsFullscreen) },
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
     }
+}
+
+private fun VideoPlayerState.togglePlay(isPlaying: Boolean) {
+    if (isPlaying) pause() else play()
+}
+
+/**
+ * Seeks to an absolute position given in milliseconds, translating it to the player's
+ * 0..1000 slider fraction. Clamped to the media duration (a no-op while the duration
+ * is still unknown).
+ */
+private fun VideoPlayerState.seekToMillis(targetMs: Long) {
+    val durationMs = duration * 1000.0
+    if (durationMs <= 0.0) return
+    val clampedMs = targetMs.toDouble().coerceIn(0.0, durationMs)
+    seekTo((clampedMs / durationMs * 1000.0).toFloat().coerceIn(0f, 1000f))
 }

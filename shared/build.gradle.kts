@@ -54,6 +54,8 @@ kotlin {
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
+        // Frozen dev/preview target (see AGENTS.md → "Target status"). Kept compiling so
+        // the shared Compose UI can be checked in a browser; not a shipping target.
     }
 
     sourceSets {
@@ -65,6 +67,10 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(libs.ktor.persistent.cache)
+                // Desktop/native/mobile video playback. Renders decoded frames into a
+                // Compose Canvas on desktop, so it works on Nucleus/Tao (no AWT/SkiaLayer).
+                // Native libs ship inside the JVM artifact — no runtime download.
+                implementation(libs.composemediaplayer)
             }
         }
 
@@ -106,7 +112,7 @@ kotlin {
                 implementation(libs.bundles.coil)
                 implementation(libs.jikan4k)
                 implementation(libs.lazyPaginationCompose)
-                implementation(libs.mediamp.all)
+                api(libs.composewebview)
             }
         }
         desktopMain.dependencies {
@@ -114,9 +120,6 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.slf4j.simple)
             implementation(libs.ktor.client.java)
-            // The MPV backend is bundled by mediamp-all but its native runtime (libmpv +
-            // FFmpeg) ships separately; without it the player fails to start on desktop.
-            runtimeOnly(libs.mediamp.mpv.runtime)
         }
         desktopMain.dependsOn(nonJsMain)
 

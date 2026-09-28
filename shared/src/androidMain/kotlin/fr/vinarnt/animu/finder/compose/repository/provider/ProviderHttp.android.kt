@@ -1,4 +1,6 @@
 package fr.vinarnt.animu.finder.compose.repository.provider
 
-actual fun provideProviderHttpClient(): ProviderHttpClient =
-    ProviderHttpClient(createProviderHttpClient())
+import fr.vinarnt.animu.finder.compose.service.CloudflareClearanceStore
+
+actual fun provideProviderHttpClient(clearances: CloudflareClearanceStore): ProviderHttpClient =
+    ProviderHttpClient(createProviderHttpClient(), clearances)

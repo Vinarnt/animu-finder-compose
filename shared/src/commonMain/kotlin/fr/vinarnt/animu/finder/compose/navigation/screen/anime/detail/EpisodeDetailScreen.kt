@@ -54,6 +54,7 @@ class EpisodeDetailScreen(
         val loadingStreams by vm.loadingStreams.collectAsStateWithLifecycle()
         val nextEpisode by vm.nextEpisode.collectAsStateWithLifecycle()
         val episodeList by vm.episodeList.collectAsStateWithLifecycle()
+        val artworkUrl by vm.artworkUrl.collectAsStateWithLifecycle()
 
         var isFullscreen by remember { mutableStateOf(false) }
         val stream = selectedStream
@@ -72,6 +73,7 @@ class EpisodeDetailScreen(
             vm.loadEpisode(animeId, episodeNumber)
             vm.loadNextEpisode(animeId, episodeNumber + 1)
             vm.loadEpisodeList(animeId)
+            vm.loadArtwork(animeId)
             vm.loadStreams(
                 EpisodeSearchQuery(
                     animeTitle = animeTitle,
@@ -103,6 +105,7 @@ class EpisodeDetailScreen(
                     loadingStreams = loadingStreams,
                     nextEpisode = nextEpisode,
                     episodes = episodeList,
+                    fallbackImageUrl = artworkUrl,
                     onSelectStream = vm::selectStream,
                     onSelectEpisode = { number ->
                         navigator.replace(

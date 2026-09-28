@@ -10,12 +10,14 @@ import fr.vinarnt.animu.finder.compose.repository.provider.AnimeParadiseProvider
 import fr.vinarnt.animu.finder.compose.repository.provider.AnimeSamaProvider
 import fr.vinarnt.animu.finder.compose.repository.provider.AnimeYaProvider
 import fr.vinarnt.animu.finder.compose.repository.provider.KickAssAnimeProvider
+import fr.vinarnt.animu.finder.compose.repository.provider.NakanimeProvider
 import fr.vinarnt.animu.finder.compose.repository.provider.ProviderHttpClient
 import fr.vinarnt.animu.finder.compose.repository.provider.StreamRepository
 import fr.vinarnt.animu.finder.compose.repository.provider.StreamingProvider
 import fr.vinarnt.animu.finder.compose.repository.provider.VoirAnimeProvider
 import fr.vinarnt.animu.finder.compose.repository.provider.provideProviderHttpClient
 import fr.vinarnt.animu.finder.compose.service.ContinueWatchingCache
+import fr.vinarnt.animu.finder.compose.service.CloudflareClearanceStore
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeDetailViewModel
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeListViewModel
 import fr.vinarnt.animu.finder.compose.viewmodel.EpisodeDetailViewModel
@@ -67,8 +69,9 @@ private val commonModule = module {
     singleOf(::SubtitleRepository)
     singleOf(::StreamRepository)
     singleOf(::ContinueWatchingCache)
+    singleOf(::CloudflareClearanceStore)
 
-    single { provideProviderHttpClient() }
+    single { provideProviderHttpClient(get()) }
 
     single<List<StreamingProvider>> {
         val http: ProviderHttpClient = get()
@@ -76,6 +79,7 @@ private val commonModule = module {
             AniNekoProvider(http),
             VoirAnimeProvider(http),
             AnimeSamaProvider(http),
+            NakanimeProvider(http),
             AnimePaheProvider(http),
             AnimeYaProvider(http),
             AnimeHeavenProvider(http),

@@ -24,6 +24,7 @@ internal fun EpisodeColumn(
     activeEpisodeNumber: Int?,
     onEpisodeClick: (GetAnimeByIdEpisodes200ResponseDataInner) -> Unit,
     lazyListState: LazyListState,
+    fallbackImageUrl: String? = null,
 ) {
     PaginatedLazyColumn(
         paginationState = paginationState,
@@ -56,6 +57,7 @@ internal fun EpisodeColumn(
                     episode = episode,
                     onClick = { onEpisodeClick(episode) },
                     isActive = isActive,
+                    fallbackImageUrl = fallbackImageUrl,
                 )
                 EpisodeDisplay.GRID -> Unit
             }

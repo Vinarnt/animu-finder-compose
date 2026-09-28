@@ -1,8 +1,8 @@
 package fr.vinarnt.animu.finder.compose.model
 
 /**
- * Target platform a stream can run on. [Web] is the wasmJs build, [Native] covers
- * desktop / Android / iOS.
+ * Target platform a stream can run on. [Web] is the wasmJs build — a frozen dev/preview
+ * target (see AGENTS.md → "Target status") — while [Native] covers desktop / Android / iOS.
  */
 enum class StreamPlatform { Web, Native }
 

@@ -31,10 +31,12 @@ fun UpNextCard(
     nextEpisodeNumber: Int,
     onClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    fallbackImageUrl: String? = null,
 ) {
     val s = strings.episodeDetail
     val title = nextEpisode?.title ?: s.episodeTitleFallback(nextEpisodeNumber)
-    val imageUrl = platformImageUrl(nextEpisode?.images?.jpg?.imageUrl)
+    val imageUrl = nextEpisode?.images?.jpg?.imageUrl?.let { platformImageUrl(it) }
+        ?: fallbackImageUrl
 
     Surface(
         modifier = modifier

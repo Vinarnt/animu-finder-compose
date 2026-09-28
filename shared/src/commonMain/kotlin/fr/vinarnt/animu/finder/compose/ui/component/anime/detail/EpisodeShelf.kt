@@ -13,6 +13,7 @@ internal fun EpisodeShelf(
     episodes: List<GetAnimeByIdEpisodes200ResponseDataInner>,
     episodeNumber: Int,
     onSelectEpisode: (Int) -> Unit,
+    fallbackImageUrl: String? = null,
 ) {
     val s = strings.episodeDetail
 
@@ -31,7 +32,7 @@ internal fun EpisodeShelf(
                 title = ep.title ?: s.episodeTitleFallback(number ?: 0),
                 subtitle = ep.aired?.take(10),
                 nowPlayingLabel = s.nowPlaying,
-                imageUrl = platformImageUrl(ep.images?.jpg?.imageUrl),
+                imageUrl = ep.images?.jpg?.imageUrl?.let { platformImageUrl(it) } ?: fallbackImageUrl,
                 isActive = number == episodeNumber,
                 onClick = { number?.let(onSelectEpisode) },
             )

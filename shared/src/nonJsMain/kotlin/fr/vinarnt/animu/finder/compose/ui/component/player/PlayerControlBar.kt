@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Audiotrack
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.Pause
@@ -39,40 +38,35 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
-import org.openani.mediamp.MediampPlayer
-import org.openani.mediamp.features.PlaybackSpeed
-import org.openani.mediamp.features.audioTracks
-import org.openani.mediamp.metadata.AudioTrack
+import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
 
 private val SpeedOptions = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
 
 /**
- * Hand-built control bar overlaid on the video surface. MediaMP ships no control UI,
- * so this reproduces the controls the previous player provided: play/pause, seek bar
- * with time labels, playback-speed selection, audio-track selection and fullscreen.
+ * Hand-built control bar overlaid on the video surface. ComposeMediaPlayer ships no
+ * control UI, so this reproduces the controls the app needs: play/pause, seek bar with
+ * time labels, playback-speed selection and fullscreen.
+ *
+ * Seeking goes through the player's own drag API ([VideoPlayerState.seekStart] /
+ * [VideoPlayerState.seekFinished]), which suppresses position updates while the user
+ * drags and keeps the thumb from fighting the playback clock.
+ * [VideoPlayerState.sliderPos] is a 0..1000 fraction of the duration.
+ *
+ * Audio-track selection is dropped: ComposeMediaPlayer takes an [AudioMode] at
+ * construction, it has no runtime audio-track switching.
  */
 @Composable
 internal fun PlayerControlBar(
-    player: MediampPlayer,
-    positionMs: Long,
-    durationMs: Long,
+    player: VideoPlayerState,
     isPlaying: Boolean,
     isFullscreen: Boolean,
-    showAudioSelector: Boolean,
     onTogglePlayPause: () -> Unit,
-    onSeek: (Long) -> Unit,
     onToggleFullscreen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val s = strings.player
-
-    // While the user drags the seek bar, drive the displayed position from the drag
-    // rather than the player so the thumb does not fight the playback clock.
-    var dragPositionMs by remember { mutableStateOf<Long?>(null) }
-    val sliderPositionMs = (dragPositionMs ?: positionMs).coerceIn(0L, durationMs.coerceAtLeast(1L))
 
     Box(
         modifier = modifier.background(
@@ -83,13 +77,10 @@ internal fun PlayerControlBar(
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = Spacing.sm)) {
             Slider(
-                value = sliderPositionMs.toFloat(),
-                onValueChange = { dragPositionMs = it.toLong() },
-                onValueChangeFinished = {
-                    dragPositionMs?.let(onSeek)
-                    dragPositionMs = null
-                },
-                valueRange = 0f..durationMs.coerceAtLeast(1L).toFloat(),
+                value = player.sliderPos,
+                onValueChange = { player.seekStart(it) },
+                onValueChangeFinished = { player.seekFinished() },
+                valueRange = 0f..1000f,
                 modifier = Modifier.fillMaxWidth(),
                 thumb = {
                     Box(
@@ -137,7 +128,7 @@ internal fun PlayerControlBar(
                 }
 
                 Text(
-                    text = "${formatTime(sliderPositionMs)} / ${formatTime(durationMs)}",
+                    text = "${player.positionText} / ${player.durationText}",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
@@ -145,10 +136,6 @@ internal fun PlayerControlBar(
                 Spacer(modifier = Modifier.weight(1f))
 
                 PlaybackSpeedMenu(player = player)
-
-                if (showAudioSelector) {
-                    AudioTrackMenu(player = player)
-                }
 
                 IconButton(onClick = onToggleFullscreen) {
                     Icon(
@@ -164,17 +151,15 @@ internal fun PlayerControlBar(
 
 @Composable
 private fun PlaybackSpeedMenu(
-    player: MediampPlayer,
+    player: VideoPlayerState,
     modifier: Modifier = Modifier,
 ) {
-    val feature = player.features[PlaybackSpeed]
-    var speed by remember { mutableStateOf(feature?.value ?: 1f) }
     var expanded by remember { mutableStateOf(false) }
 
     Box(modifier = modifier) {
         TextButton(onClick = { expanded = true }) {
             Text(
-                text = "${formatSpeed(speed)}x",
+                text = "${formatSpeed(player.playbackSpeed)}x",
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
@@ -183,8 +168,7 @@ private fun PlaybackSpeedMenu(
                 DropdownMenuItem(
                     text = { Text("${formatSpeed(option)}x") },
                     onClick = {
-                        feature?.set(option)
-                        speed = option
+                        player.playbackSpeed = option
                         expanded = false
                     },
                 )
@@ -192,55 +176,6 @@ private fun PlaybackSpeedMenu(
         }
     }
 }
-
-@Composable
-private fun AudioTrackMenu(
-    player: MediampPlayer,
-    modifier: Modifier = Modifier,
-) {
-    val trackGroup = player.audioTracks ?: return
-    val candidates by trackGroup.candidates.collectAsStateWithLifecycle(emptyList())
-    var expanded by remember { mutableStateOf(false) }
-
-    // A single candidate offers nothing to switch to.
-    if (candidates.size < 2) return
-
-    Box(modifier = modifier) {
-        IconButton(onClick = { expanded = true }) {
-            Icon(
-                imageVector = Icons.Filled.Audiotrack,
-                contentDescription = strings.player.audio,
-                tint = MaterialTheme.colorScheme.onSurface,
-            )
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            candidates.forEach { track ->
-                DropdownMenuItem(
-                    text = { Text(audioTrackLabel(track)) },
-                    onClick = {
-                        trackGroup.select(track)
-                        expanded = false
-                    },
-                )
-            }
-        }
-    }
-}
-
-private fun audioTrackLabel(track: AudioTrack): String =
-    track.name ?: track.labels.firstOrNull()?.value ?: track.id
 
 private fun formatSpeed(speed: Float): String =
     if (speed % 1f == 0f) speed.toInt().toString() else speed.toString()
-
-private fun formatTime(ms: Long): String {
-    val totalSeconds = (ms / 1000).coerceAtLeast(0)
-    val hours = totalSeconds / 3600
-    val minutes = (totalSeconds % 3600) / 60
-    val seconds = totalSeconds % 60
-    return if (hours > 0) {
-        "$hours:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
-    } else {
-        "$minutes:${seconds.toString().padStart(2, '0')}"
-    }
-}

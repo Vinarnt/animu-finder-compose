@@ -44,6 +44,7 @@ fun EpisodeItemDesignPoster(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     isActive: Boolean = false,
+    fallbackImageUrl: String? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -81,7 +82,8 @@ fun EpisodeItemDesignPoster(
                     .align(Alignment.CenterVertically),
                 contentAlignment = Alignment.TopStart
             ) {
-                val imageUrl = platformImageUrl(episode.images?.jpg?.imageUrl)
+                val imageUrl = episode.images?.jpg?.imageUrl?.let { platformImageUrl(it) }
+                    ?: fallbackImageUrl
                 if (imageUrl != null) {
                     AsyncImage(
                         model = imageUrl,

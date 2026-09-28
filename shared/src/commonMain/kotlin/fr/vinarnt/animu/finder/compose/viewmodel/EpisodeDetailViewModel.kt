@@ -11,6 +11,7 @@ import fr.vinarnt.animu.finder.compose.repository.AnimeRepository
 import fr.vinarnt.animu.finder.compose.repository.provider.EpisodeSearchQuery
 import fr.vinarnt.animu.finder.compose.repository.provider.StreamRepository
 import fr.vinarnt.animu.finder.compose.service.SettingManager
+import fr.vinarnt.animu.finder.compose.util.animeArtworkUrl
 import fr.vinarnt.jikan4k.models.GetAnimeByIdEpisodesByEpisodeId200ResponseData
 import fr.vinarnt.jikan4k.models.GetAnimeByIdEpisodes200ResponseDataInner
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +43,9 @@ class EpisodeDetailViewModel(
 
     private val _episodeList = MutableStateFlow<List<GetAnimeByIdEpisodes200ResponseDataInner>>(emptyList())
     val episodeList: StateFlow<List<GetAnimeByIdEpisodes200ResponseDataInner>> = _episodeList.asStateFlow()
+
+    private val _artworkUrl = MutableStateFlow<String?>(null)
+    val artworkUrl: StateFlow<String?> = _artworkUrl.asStateFlow()
 
     private var episodeLoadGeneration = 0
     private var nextEpisodeLoadGeneration = 0
@@ -123,6 +127,17 @@ class EpisodeDetailViewModel(
                 _episodeList.value = page.data
             } catch (e: Exception) {
                 Logger.w("Failed to load episode list: ${e.message}", e)
+            }
+        }
+    }
+
+    /** The title's artwork, used as a fallback for episodes that have no image of their own. */
+    fun loadArtwork(animeId: Int) {
+        viewModelScope.launch {
+            try {
+                _artworkUrl.value = animeArtworkUrl(animeRepository.getAnimeById(animeId))
+            } catch (e: Exception) {
+                Logger.w("Failed to load artwork: ${e.message}", e)
             }
         }
     }

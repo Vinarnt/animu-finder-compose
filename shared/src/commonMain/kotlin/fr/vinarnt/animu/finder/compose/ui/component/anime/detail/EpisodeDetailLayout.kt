@@ -28,6 +28,7 @@ fun EpisodeDetailLayout(
     loadingStreams: Boolean,
     nextEpisode: GetAnimeByIdEpisodesByEpisodeId200ResponseData? = null,
     episodes: List<GetAnimeByIdEpisodes200ResponseDataInner> = emptyList(),
+    fallbackImageUrl: String? = null,
     onSelectStream: (StreamSource) -> Unit,
     onSelectEpisode: (Int) -> Unit = {},
     modifier: Modifier = Modifier,
@@ -67,6 +68,7 @@ fun EpisodeDetailLayout(
                     loadingStreams = loadingStreams,
                     onSelectStream = onSelectStream,
                     onPlayNext = onPlayNext,
+                    fallbackImageUrl = fallbackImageUrl,
                 )
             }
 
@@ -76,6 +78,7 @@ fun EpisodeDetailLayout(
                         episodes = episodes,
                         episodeNumber = episodeNumber,
                         onSelectEpisode = onSelectEpisode,
+                        fallbackImageUrl = fallbackImageUrl,
                     )
                 }
             }

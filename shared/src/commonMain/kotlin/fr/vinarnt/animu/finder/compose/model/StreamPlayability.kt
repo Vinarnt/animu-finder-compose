@@ -21,6 +21,10 @@ object StreamPlayability {
     private val NATIVE_HOSTS = listOf(
         "mp4upload.com",
         "okcdn.ru",
+        // Nakanime's Sibnet / ok.ru sources: signed, expiring, IP-locked direct files
+        // that require a Referer header the web media proxy cannot reproduce.
+        "sibnet.ru",
+        "my.mail.ru",
     )
 
     /** Hosts verified to stream on every target (HLS via the proxy on web, direct on native). */
@@ -37,6 +41,9 @@ object StreamPlayability {
         "krussdomi.com",
         "animeparadise.moe",
         "anime-sama.fr",
+        // Nakanime's Sibnet source: 403 without a Referer, and 200-but-empty HTML *with*
+        // one — it needs its own player/session flow, so the direct .mp4 is never valid.
+        "sibnet.ru",
     )
 
     /**
@@ -49,6 +56,9 @@ object StreamPlayability {
         // Ephemeral HLS workers serve playlists as `master.txt` on rotating subdomains
         // that 404 within minutes. They are dead on every target.
         if (lower.contains("/hls") && lower.endsWith(".txt")) return emptySet()
+        // Embed placeholders: Nakanime's `vidzy` source resolves to `s1.fsvid.lol/troll/…`,
+        // a ~18s troll clip that is not the episode at all.
+        if (lower.contains("/troll/")) return emptySet()
         if (host == null) return setOf(StreamPlatform.Web, StreamPlatform.Native)
         if (DEAD_HOSTS.any { host == it || host.endsWith(".$it") }) return emptySet()
         if (WEB_HOSTS.any { host == it || host.endsWith(".$it") }) return setOf(StreamPlatform.Web)

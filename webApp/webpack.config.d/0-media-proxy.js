@@ -1,6 +1,12 @@
 /*
  * Dev-only CORS/media proxy for the wasm app.
  *
+ * FROZEN: wasm is a dev/preview target (see AGENTS.md → "Target status"), so this
+ * middleware is dev-only by design. It is an open proxy: `?url=` accepts any target,
+ * with no auth or allowlist. Never expose a webpack-dev-server running this publicly,
+ * and don't reuse it as the basis of a production backend without adding host
+ * allowlisting, quotas and signed/short-lived media URLs.
+ *
  * Adds a `GET|POST|HEAD|OPTIONS /proxy?url=<target>` endpoint to webpack-dev-server.
  * The server (running on the user's machine) fetches the target on the app's behalf
  * and returns it with permissive CORS headers. Because the request comes from a

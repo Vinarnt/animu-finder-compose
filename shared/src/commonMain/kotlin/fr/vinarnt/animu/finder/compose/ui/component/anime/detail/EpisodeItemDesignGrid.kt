@@ -28,6 +28,7 @@ fun EpisodeItemDesignGrid(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     isActive: Boolean = false,
+    fallbackImageUrl: String? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
@@ -47,7 +48,7 @@ fun EpisodeItemDesignGrid(
         border = if (isActive) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            EpisodeGridThumbnail(episode)
+            EpisodeGridThumbnail(episode, fallbackImageUrl = fallbackImageUrl)
             EpisodeGridCaption(episode = episode, isActive = isActive)
         }
     }

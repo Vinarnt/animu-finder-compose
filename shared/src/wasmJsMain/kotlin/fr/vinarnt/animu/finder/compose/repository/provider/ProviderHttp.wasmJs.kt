@@ -1,7 +1,9 @@
 package fr.vinarnt.animu.finder.compose.repository.provider
 
 import io.ktor.client.HttpClient
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Url
+import fr.vinarnt.animu.finder.compose.service.CloudflareClearanceStore
 import kotlinx.browser.window
 import kotlinx.coroutines.CancellationException
 
@@ -28,43 +30,48 @@ fun encodeUrlComponent(input: String): String {
     }
 }
 
-actual fun provideProviderHttpClient(): ProviderHttpClient =
-    CorsProviderHttpClient(createProviderHttpClient(), CORS_PROXIES)
+actual fun provideProviderHttpClient(clearances: CloudflareClearanceStore): ProviderHttpClient =
+    CorsProviderHttpClient(createProviderHttpClient(), CORS_PROXIES, clearances)
 
 class CorsProviderHttpClient(
     client: HttpClient,
     private val corsProxies: List<(String) -> String>,
-) : ProviderHttpClient(client) {
+    cloudflare: CloudflareClearanceStore,
+) : ProviderHttpClient(client, cloudflare) {
 
     private val corsLockedDomains = mutableSetOf<String>()
     private var nextProxyIndex = 0
 
-    override suspend fun execute(url: String, headers: Map<String, String>, body: String?): String {
-        if (corsProxies.isEmpty()) return super.execute(url, headers, body)
+    override suspend fun perform(
+        url: String,
+        headers: Map<String, String>,
+        body: String?,
+    ): HttpResponse {
+        if (corsProxies.isEmpty()) return super.perform(url, headers, body)
 
         val host = runCatching { Url(url).host }.getOrNull()
         if (host != null && host in corsLockedDomains) {
-            return executeThroughProxies(url, headers, body, null)
+            return performThroughProxies(url, headers, body, null)
         }
 
         return try {
-            super.execute(url, headers, body)
+            super.perform(url, headers, body)
         } catch (e: CancellationException) {
             throw e
         } catch (e: HttpStatusException) {
             throw e
         } catch (e: Throwable) {
             if (host != null) corsLockedDomains += host
-            executeThroughProxies(url, headers, body, e)
+            performThroughProxies(url, headers, body, e)
         }
     }
 
-    private suspend fun executeThroughProxies(
+    private suspend fun performThroughProxies(
         url: String,
         headers: Map<String, String>,
         body: String?,
         firstError: Throwable?,
-    ): String {
+    ): HttpResponse {
         val start = nextProxyIndex
         nextProxyIndex = (nextProxyIndex + 1) % corsProxies.size
 
@@ -72,7 +79,7 @@ class CorsProviderHttpClient(
         for (i in corsProxies.indices) {
             val proxy = corsProxies[(start + i) % corsProxies.size]
             try {
-                return super.execute(proxy(url), headers, body)
+                return super.perform(proxy(url), headers, body)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Throwable) {

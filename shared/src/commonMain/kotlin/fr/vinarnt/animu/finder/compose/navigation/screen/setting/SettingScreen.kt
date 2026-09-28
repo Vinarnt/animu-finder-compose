@@ -11,10 +11,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.ui.component.base.layout.MainLayout
 import fr.vinarnt.animu.finder.compose.ui.component.navigation.bar.NavigationBar
 import fr.vinarnt.animu.finder.compose.ui.component.setting.SettingsAutoplaySwitch
+import fr.vinarnt.animu.finder.compose.ui.component.setting.SettingsCloudflareClearances
 import fr.vinarnt.animu.finder.compose.ui.component.setting.SettingsGroup
 import fr.vinarnt.animu.finder.compose.ui.component.setting.SettingsLanguageSelect
 import fr.vinarnt.animu.finder.compose.ui.component.setting.SettingsQualitySelect
@@ -33,11 +36,13 @@ class SettingScreen : Screen {
     @Composable
     override fun Content() {
         val vm: SettingsViewModel = koinViewModel()
+        val navigator = LocalNavigator.currentOrThrow
         val theme by vm.theme.collectAsStateWithLifecycle()
         val locale by vm.locale.collectAsStateWithLifecycle()
         val quality by vm.defaultQuality.collectAsStateWithLifecycle()
         val subtitles by vm.preferredSubtitles.collectAsStateWithLifecycle()
         val autoplayNext by vm.autoplayNext.collectAsStateWithLifecycle()
+        val cloudflareClearances by vm.cloudflareClearances.collectAsStateWithLifecycle()
 
         MainLayout(
             topBar = { NavigationBar(strings.settings.title) }
@@ -61,6 +66,15 @@ class SettingScreen : Screen {
                     SettingsQualitySelect(quality = quality, onSelect = vm::setDefaultQuality)
                     SettingsSubtitlesSelect(subtitles = subtitles, onSelect = vm::setPreferredSubtitles)
                     SettingsAutoplaySwitch(enabled = autoplayNext, onChange = vm::setAutoplayNext)
+                }
+
+                SettingsGroup(title = strings.settings.cloudflare.label.uppercase()) {
+                    SettingsCloudflareClearances(
+                        clearances = cloudflareClearances,
+                        onOpen = { site ->
+                            navigator.push(CloudflareClearanceScreen(site.label, site.host))
+                        },
+                    )
                 }
             }
         }

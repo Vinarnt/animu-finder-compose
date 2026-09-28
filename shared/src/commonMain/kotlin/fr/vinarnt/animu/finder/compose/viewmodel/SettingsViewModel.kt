@@ -3,6 +3,8 @@ package fr.vinarnt.animu.finder.compose.viewmodel
 import androidx.compose.ui.text.intl.Locale
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import fr.vinarnt.animu.finder.compose.model.CloudflareClearance
+import fr.vinarnt.animu.finder.compose.service.CloudflareClearanceStore
 import fr.vinarnt.animu.finder.compose.service.SettingManager
 import fr.vinarnt.animu.finder.compose.ui.theme.Theme
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,6 +18,7 @@ import kotlinx.coroutines.launch
  */
 class SettingsViewModel(
     private val settingManager: SettingManager,
+    private val cloudflareClearanceStore: CloudflareClearanceStore,
 ) : ViewModel() {
 
     val theme: StateFlow<Theme> = settingManager.getTheme()
@@ -32,6 +35,10 @@ class SettingsViewModel(
 
     val autoplayNext: StateFlow<Boolean> = settingManager.getAutoplayNext()
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    val cloudflareClearances: StateFlow<Map<String, CloudflareClearance>> =
+        cloudflareClearanceStore.clearances()
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
 
     fun setTheme(theme: Theme) {
         viewModelScope.launch { settingManager.setTheme(theme) }
@@ -51,6 +58,18 @@ class SettingsViewModel(
 
     fun setAutoplayNext(enabled: Boolean) {
         viewModelScope.launch { settingManager.setAutoplayNext(enabled) }
+    }
+
+    fun saveCloudflareClearance(host: String, cookie: String, userAgent: String) {
+        viewModelScope.launch {
+            cloudflareClearanceStore.save(host, cookie, userAgent)
+        }
+    }
+
+    fun removeCloudflareClearance(host: String) {
+        viewModelScope.launch {
+            cloudflareClearanceStore.remove(host)
+        }
     }
 
     companion object {

@@ -19,14 +19,16 @@ kermit = "2.1.0"
 voyager = "2.2.21-1.10.3"
 multiplatform-settings = "1.3.0"
 lyricist = "1.9.0"
-coil = "3.5.0"
+coil = "3.6.3"
 slf4j = "2.0.18"
 jikan4k = "1.0.3"
 lazy-pagination-compose = "1.7.3"
 ktor-persistent-cache = "1.2.0"
 material3Android = "1.4.0"
 compose-ui-tooling = "1.12.0"
-mediamp = "0.3.0"
+composemediaplayer = "0.11.4"
+composewebview = "1.0.3"
+nucleus = "2.5.5"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -64,8 +66,11 @@ jikan4k = { module = "com.github.vinarnt.Jikan4k:jikan4k", version.ref = "jikan4
 lazyPaginationCompose = { module = "io.github.ahmad-hamwi:lazy-pagination-compose", version.ref = "lazy-pagination-compose" }
 ktor-persistent-cache = { module = "io.github.santimattius:ktor-persistent-cache", version.ref = "ktor-persistent-cache" }
 composeUITooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose-ui-tooling" }
-mediamp-all = { module = "org.openani.mediamp:mediamp-all", version.ref = "mediamp" }
-mediamp-mpv-runtime = { module = "org.openani.mediamp:mediamp-mpv-runtime", version.ref = "mediamp" }
+composemediaplayer = { module = "io.github.kdroidfilter:composemediaplayer", version.ref = "composemediaplayer" }
+composewebview = { module = "dev.nucleusframework:composewebview", version.ref = "composewebview" }
+nucleus-application = { module = "dev.nucleusframework:nucleus.nucleus-application", version.ref = "nucleus" }
+nucleus-decorated-window-tao = { module = "dev.nucleusframework:nucleus.decorated-window-tao", version.ref = "nucleus" }
+nucleus-core-runtime = { module = "dev.nucleusframework:nucleus.core-runtime", version.ref = "nucleus" }
 
 
 # Used only for desktop hot reload
@@ -83,6 +88,7 @@ composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "com
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+nucleus = { id = "dev.nucleusframework", version.ref = "nucleus" }
 
 [bundles]
 voyager = ["voyager-navigator", "voyager-transitions", "voyager-koin"]

@@ -70,7 +70,32 @@ data class SettingStrings(
     val subtitleLanguageEnglish: String,
     val subtitleLanguageFrench: String,
     val subtitleLanguageJapanese: String,
-    val subtitleLanguageNone: String
+    val subtitleLanguageNone: String,
+    val cloudflare: SettingCloudflareStrings
+)
+
+/**
+ * Copy for the Cloudflare clearance capture (shared by all providers).
+ */
+data class SettingCloudflareStrings(
+    val label: String,
+    val description: String,
+    val openSite: String,
+    val save: String,
+    val clear: String,
+    val statusConfigured: String,
+    val statusMissing: String,
+    val captureHint: String,
+    val captureButton: String,
+    val captureFailed: String,
+    val captureSuccess: String,
+    val captureUnsupported: String,
+    val solving: String,
+    val cancel: String,
+    val cookieLabel: String,
+    val cookieHint: String,
+    val userAgentLabel: String,
+    val userAgentHint: String
 )
 
 data class SettingThemeStrings(

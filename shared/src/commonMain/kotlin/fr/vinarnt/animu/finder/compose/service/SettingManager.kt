@@ -3,6 +3,7 @@ package fr.vinarnt.animu.finder.compose.service
 import androidx.compose.ui.text.intl.Locale
 import cafe.adriel.lyricist.LanguageTag
 import com.russhwolf.settings.coroutines.FlowSettings
+import fr.vinarnt.animu.finder.compose.model.CloudflareClearance
 import fr.vinarnt.animu.finder.compose.model.ContinueWatchingEntry
 import fr.vinarnt.animu.finder.compose.model.EpisodeDisplay
 import fr.vinarnt.animu.finder.compose.model.SubtitlePosition
@@ -51,6 +52,31 @@ class SettingManager(val settings: FlowSettings) {
     suspend fun setSubtitlePosition(position: SubtitlePosition) =
         settings.putString("subtitlePosition", json.encodeToString(position))
 
+    /**
+     * Cloudflare clearances keyed by host. Each entry holds the `cf_clearance` cookie
+     * and the User-Agent that solved the challenge (Cloudflare binds the two).
+     * See [fr.vinarnt.animu.finder.compose.service.CloudflareClearanceStore].
+     */
+    fun getCloudflareClearances(): Flow<Map<String, CloudflareClearance>> =
+        settings.getStringFlow("cloudflareClearances", "{}")
+            .map { decodeClearances(it) }
+
+    suspend fun saveCloudflareClearance(host: String, clearance: CloudflareClearance) {
+        val current = getCloudflareClearances().first()
+        settings.putString(
+            "cloudflareClearances",
+            json.encodeToString(current + (host.lowercase() to clearance)),
+        )
+    }
+
+    suspend fun removeCloudflareClearance(host: String) {
+        val current = getCloudflareClearances().first()
+        settings.putString(
+            "cloudflareClearances",
+            json.encodeToString(current - host.lowercase()),
+        )
+    }
+
     fun getWatchHistory(): Flow<List<ContinueWatchingEntry>> =
         settings.getStringFlow("watchHistory", "[]")
             .map { decode(it) }
@@ -78,6 +104,10 @@ class SettingManager(val settings: FlowSettings) {
     private fun decodeIntList(value: String): List<Int> =
         runCatching { json.decodeFromString<List<Int>>(value) }
             .getOrElse { emptyList() }
+
+    private fun decodeClearances(value: String): Map<String, CloudflareClearance> =
+        runCatching { json.decodeFromString<Map<String, CloudflareClearance>>(value) }
+            .getOrElse { emptyMap() }
 
     private fun decodeSubtitlePosition(value: String): SubtitlePosition =
         runCatching { json.decodeFromString<SubtitlePosition>(value) }

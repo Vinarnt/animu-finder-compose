@@ -15,6 +15,7 @@ import fr.vinarnt.animu.finder.compose.model.EpisodeDisplay
 import fr.vinarnt.animu.finder.compose.navigation.screen.anime.detail.EpisodeDetailScreen
 import fr.vinarnt.animu.finder.compose.ui.theme.Breakpoints
 import fr.vinarnt.animu.finder.compose.ui.theme.Size
+import fr.vinarnt.animu.finder.compose.util.animeArtworkUrl
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeDetailViewModel
 import fr.vinarnt.jikan4k.models.GetAnimeByIdEpisodes200ResponseDataInner
 import org.koin.compose.viewmodel.koinViewModel
@@ -32,6 +33,8 @@ fun AnimeDetailLayoutContent(modifier: Modifier = Modifier, lazyListState: LazyL
     val activeEpisodeNumber = anime?.malId?.let { malId ->
         watchHistory.firstOrNull { it.animeId == malId }?.episodeNumber
     }
+    // Some titles have no per-episode images; fall back to the title's own artwork.
+    val fallbackImageUrl = anime?.let { animeArtworkUrl(it) }
 
     BoxWithConstraints(
         modifier = modifier.fillMaxSize()
@@ -78,6 +81,7 @@ fun AnimeDetailLayoutContent(modifier: Modifier = Modifier, lazyListState: LazyL
                             gutter = gutter,
                             activeEpisodeNumber = activeEpisodeNumber,
                             onEpisodeClick = onEpisodeClick,
+                            fallbackImageUrl = fallbackImageUrl,
                         )
                     } else {
                         EpisodeColumn(
@@ -88,6 +92,7 @@ fun AnimeDetailLayoutContent(modifier: Modifier = Modifier, lazyListState: LazyL
                             activeEpisodeNumber = activeEpisodeNumber,
                             onEpisodeClick = onEpisodeClick,
                             lazyListState = lazyListState,
+                            fallbackImageUrl = fallbackImageUrl,
                         )
                     }
                 }

@@ -23,6 +23,7 @@ internal fun EpisodeGrid(
     gutter: Dp,
     activeEpisodeNumber: Int?,
     onEpisodeClick: (GetAnimeByIdEpisodes200ResponseDataInner) -> Unit,
+    fallbackImageUrl: String? = null,
 ) {
     PaginatedLazyVerticalGrid(
         paginationState = paginationState,
@@ -53,6 +54,7 @@ internal fun EpisodeGrid(
                 episode = episode,
                 onClick = { onEpisodeClick(episode) },
                 isActive = episode.malId == activeEpisodeNumber,
+                fallbackImageUrl = fallbackImageUrl,
             )
         }
     }
