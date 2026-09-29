@@ -52,6 +52,7 @@ private val commonModule = module {
                         level = LogLevel.INFO
                     }
                     configureJikanCache()
+                    configureJikanRateLimit()
                 }
             }
         )
