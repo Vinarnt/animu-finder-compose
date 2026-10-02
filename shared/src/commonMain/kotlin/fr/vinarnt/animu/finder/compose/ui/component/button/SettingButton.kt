@@ -21,7 +21,7 @@ fun SettingButton(onGlass: Boolean = false) {
         },
         anchorPosition = TooltipAnchorPosition.Below,
     ) {
-        GlassIconButton(
+        AppBarIconButton(
             imageVector = Icons.Default.Settings,
             contentDescription = strings.settings.title,
             onClick = {

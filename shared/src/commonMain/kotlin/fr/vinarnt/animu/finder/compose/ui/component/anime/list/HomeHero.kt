@@ -112,6 +112,7 @@ fun HomeHero(
                 onDotClick = onDotClick,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
+                    // Sits just below the app bar, which is also the window's title bar on desktop.
                     .padding(top = if (compact) 60.dp else 64.dp, end = hPad),
             )
 

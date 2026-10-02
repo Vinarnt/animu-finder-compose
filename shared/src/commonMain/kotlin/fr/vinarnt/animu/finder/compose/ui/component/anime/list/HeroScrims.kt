@@ -8,7 +8,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-/** The two hero scrims: a left-to-right one for copy legibility and a bottom shade for the CTA row. */
+/**
+ * The hero's scrims: a left-to-right one for copy legibility, a top one for the app bar that sits
+ * over the artwork, and a bottom shade for the CTA row.
+ */
 @Composable
 internal fun HeroScrims() {
     // Left-to-right scrim keeps copy readable.
@@ -21,6 +24,18 @@ internal fun HeroScrims() {
                     0.4f to Color(0xB307090D),
                     0.7f to Color(0x3D07090D),
                     1f to Color(0x0F07090D),
+                )
+            )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    0f to Color(0xE607090D),
+                    0.18f to Color(0x8007090D),
+                    0.42f to Color.Transparent,
                 )
             )
     )

@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-/** The detail banner's left shade and bottom fade-to-background scrims. */
+/** The detail banner's left shade, top shade for the app bar, and bottom fade-to-background scrims. */
 @Composable
 internal fun DetailHeroScrims() {
     Box(
@@ -21,6 +21,18 @@ internal fun DetailHeroScrims() {
                     0.46f to Color(0x6107090D),
                     0.78f to Color.Transparent,
                     1f to Color.Transparent,
+                )
+            )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    0f to Color(0xE607090D),
+                    0.2f to Color(0x8007090D),
+                    0.45f to Color.Transparent,
                 )
             )
     )

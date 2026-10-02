@@ -2,26 +2,28 @@ package fr.vinarnt.animu.finder.compose.ui.component.navigation.bar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import fr.vinarnt.animu.finder.compose.i18n.strings
+import fr.vinarnt.animu.finder.compose.ui.LocalAppBarOnImage
+import fr.vinarnt.animu.finder.compose.ui.LocalWindowControlsHost
+import fr.vinarnt.animu.finder.compose.ui.component.button.AppBarIconButton
+import fr.vinarnt.animu.finder.compose.ui.component.button.MyListButton
+import fr.vinarnt.animu.finder.compose.ui.component.button.SettingButton
 import fr.vinarnt.animu.finder.compose.ui.theme.*
 
 @Composable
@@ -34,6 +36,9 @@ fun NavigationBar(
 ) {
     val navigator = LocalNavigator.currentOrThrow
     val onImage = overlay && !scrolled
+    val windowControls = LocalWindowControlsHost.current
+    val hostBarOnImage = LocalAppBarOnImage.current
+    SideEffect { hostBarOnImage.value = onImage }
 
     val containerColor = when {
         !overlay -> MaterialTheme.colorScheme.surfaceContainerLowest
@@ -71,21 +76,23 @@ fun NavigationBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             CompositionLocalProvider(LocalContentColor provides contentColor) {
+                windowControls.leading?.invoke()
+
                 if (navigator.canPop) {
-                    NavIconButton(
+                    AppBarIconButton(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = strings.navigation.back,
                         onClick = { navigator.pop() },
-                        onImage = onImage,
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = strings.navigation.back)
-                    }
+                        onGlass = onImage,
+                    )
                     // Show home shortcut when at least two screens deep (home -> x -> y).
                     if (navigator.size >= 3) {
-                        NavIconButton(
+                        AppBarIconButton(
+                            imageVector = Icons.Filled.Home,
+                            contentDescription = strings.navigation.home,
                             onClick = { navigator.popUntilRoot() },
-                            onImage = onImage,
-                        ) {
-                            Icon(Icons.Filled.Home, contentDescription = strings.navigation.home)
-                        }
+                            onGlass = onImage,
+                        )
                     }
                 }
 
@@ -110,33 +117,12 @@ fun NavigationBar(
                     horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
                 ) {
                     actions()
+                    MyListButton(onGlass = onImage)
+                    SettingButton(onGlass = onImage)
                 }
+
+                windowControls.trailing?.invoke()
             }
         }
-    }
-}
-
-@Composable
-private fun RowScope.NavIconButton(
-    onClick: () -> Unit,
-    onImage: Boolean,
-    content: @Composable () -> Unit,
-) {
-    IconButton(
-        onClick = onClick,
-        modifier = Modifier
-            .size(Size.TouchTarget.min)
-            .pointerHoverIcon(PointerIcon.Hand)
-            .then(
-                if (onImage) {
-                    Modifier
-                        .clip(CircleShape)
-                        .background(heroGlass)
-                } else {
-                    Modifier
-                }
-            )
-    ) {
-        content()
     }
 }
