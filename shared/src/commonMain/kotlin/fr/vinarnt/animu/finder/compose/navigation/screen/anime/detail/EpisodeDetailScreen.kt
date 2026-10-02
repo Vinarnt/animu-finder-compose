@@ -5,6 +5,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
@@ -30,7 +31,7 @@ import fr.vinarnt.animu.finder.compose.repository.provider.EpisodeSearchQuery
 import fr.vinarnt.animu.finder.compose.ui.component.anime.detail.EpisodeDetailLayout
 import fr.vinarnt.animu.finder.compose.ui.component.base.layout.MainLayout
 import fr.vinarnt.animu.finder.compose.ui.component.navigation.bar.NavigationBar
-import fr.vinarnt.animu.finder.compose.ui.component.player.PlayerFullscreenEffect
+import fr.vinarnt.animu.finder.compose.ui.component.player.LocalPlayerImmersive
 import fr.vinarnt.animu.finder.compose.ui.component.player.StreamingVideoPlayer
 import fr.vinarnt.animu.finder.compose.viewmodel.EpisodeDetailViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -56,17 +57,22 @@ class EpisodeDetailScreen(
         val episodeList by vm.episodeList.collectAsStateWithLifecycle()
         val artworkUrl by vm.artworkUrl.collectAsStateWithLifecycle()
 
-        var isFullscreen by remember { mutableStateOf(false) }
+        val immersiveState = LocalPlayerImmersive.current
+        val immersive by immersiveState
         val stream = selectedStream
         val navigator = LocalNavigator.currentOrThrow
         val movablePlayer = remember {
             movableContentOf<StreamSource> { source ->
                 StreamingVideoPlayer(
                     source = source,
-                    isFullscreen = isFullscreen,
-                    onFullscreenChange = { isFullscreen = it },
+                    isFullscreen = immersive,
+                    onFullscreenChange = { immersiveState.value = it },
                 )
             }
+        }
+        
+        DisposableEffect(Unit) {
+            onDispose { immersiveState.value = false }
         }
 
         LaunchedEffect(animeId, episodeNumber) {
@@ -118,7 +124,7 @@ class EpisodeDetailScreen(
                             )
                         )
                     },
-                    isFullscreen = isFullscreen,
+                    isFullscreen = immersive,
                     playerContent = {
                         if (stream != null) {
                             movablePlayer(stream)
@@ -138,7 +144,7 @@ class EpisodeDetailScreen(
                 )
             }
 
-            if (isFullscreen && stream != null) {
+            if (immersive && stream != null) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -146,7 +152,7 @@ class EpisodeDetailScreen(
                         .focusable()
                         .onPreviewKeyEvent { event ->
                             if (event.type == KeyEventType.KeyDown && event.key == Key.Escape) {
-                                isFullscreen = false
+                                immersiveState.value = false
                                 true
                             } else {
                                 false
@@ -156,8 +162,6 @@ class EpisodeDetailScreen(
                     movablePlayer(stream)
                 }
             }
-
-            PlayerFullscreenEffect(isFullscreen = isFullscreen) { isFullscreen = false }
         }
     }
 }

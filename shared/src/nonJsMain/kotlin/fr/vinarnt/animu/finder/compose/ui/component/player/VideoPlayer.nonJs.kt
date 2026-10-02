@@ -48,20 +48,19 @@ import kotlinx.coroutines.delay
 private const val SeekStepMillis = 10_000L
 
 /**
- * Streaming video player backed by ComposeMediaPlayer. One player instance per media
- * URL: the subtree is keyed on [StreamSource.url], so switching source builds a fresh
- * player. Renders the video surface plus a hand-built control bar.
+ * Streaming video player backed by ComposeMediaPlayer. The subtree is keyed on
+ * [StreamSource.url], so switching source builds a fresh player. Renders the video surface plus
+ * a hand-built control bar.
  *
- * ComposeMediaPlayer decodes natively (GStreamer on Linux, platform bridges elsewhere)
- * but draws each frame into a Compose [androidx.compose.foundation.Canvas], so unlike
- * mediamp's desktop backend it needs neither AWT/SkiaLayer nor the host window's Skia
- * `DirectContext` — which is what lets it run inside a Nucleus Tao window.
+ * ComposeMediaPlayer decodes natively (GStreamer on Linux, platform bridges elsewhere) and draws
+ * each frame into a Compose [androidx.compose.foundation.Canvas], so it needs neither
+ * AWT/SkiaLayer nor the host window's Skia `DirectContext`. That is what lets it run inside a
+ * Nucleus Tao window.
  *
- * The library also has its own `toggleFullscreen()`; it is deliberately not used here.
- * Its fullscreen overlay opens an `androidx.compose.ui.window.Window` (AWT), which Tao
- * cannot host, and the Linux surface stops painting while `isFullscreen` is set. The
- * app already drives fullscreen through [onFullscreenChange], so the player leaves
- * `VideoPlayerState.isFullscreen` alone and lets the caller move the surface.
+ * The library's own `toggleFullscreen()` is not used. Its fullscreen overlay opens an
+ * `androidx.compose.ui.window.Window` (AWT), which Tao cannot host, and the Linux surface stops
+ * painting while `isFullscreen` is set. The app drives fullscreen through [onFullscreenChange]
+ * instead, leaving `VideoPlayerState.isFullscreen` alone.
  */
 @Composable
 actual fun StreamingVideoPlayer(
@@ -109,9 +108,13 @@ actual fun StreamingVideoPlayer(
         LaunchedEffect(Unit) { focusRequester.requestFocus() }
 
         Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .aspectRatio(16f / 9f)
+            modifier = (
+                if (isFullscreen) {
+                    modifier.fillMaxSize()
+                } else {
+                    modifier.fillMaxWidth().aspectRatio(16f / 9f)
+                }
+                )
                 .background(Color.Black)
                 .hoverable(interaction)
                 .focusRequester(focusRequester)

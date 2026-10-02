@@ -44,19 +44,6 @@ import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
 
 private val SpeedOptions = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
 
-/**
- * Hand-built control bar overlaid on the video surface. ComposeMediaPlayer ships no
- * control UI, so this reproduces the controls the app needs: play/pause, seek bar with
- * time labels, playback-speed selection and fullscreen.
- *
- * Seeking goes through the player's own drag API ([VideoPlayerState.seekStart] /
- * [VideoPlayerState.seekFinished]), which suppresses position updates while the user
- * drags and keeps the thumb from fighting the playback clock.
- * [VideoPlayerState.sliderPos] is a 0..1000 fraction of the duration.
- *
- * Audio-track selection is dropped: ComposeMediaPlayer takes an [AudioMode] at
- * construction, it has no runtime audio-track switching.
- */
 @Composable
 internal fun PlayerControlBar(
     player: VideoPlayerState,

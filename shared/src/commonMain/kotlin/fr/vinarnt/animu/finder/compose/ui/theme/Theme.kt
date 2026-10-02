@@ -5,8 +5,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import fr.vinarnt.animu.finder.compose.ui.LocalWindowBackgroundColor
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -95,12 +97,17 @@ fun AppTheme(
     theme: Theme,
     content: @Composable () -> Unit
 ) {
+    val colorScheme = when (theme) {
+        Theme.AUTO -> if (isSystemInDarkTheme()) darkScheme else lightScheme
+        Theme.LIGHT -> lightScheme
+        Theme.DARK -> darkScheme
+    }
+
+    val hostWindowBackground = LocalWindowBackgroundColor.current
+    SideEffect { hostWindowBackground.value = colorScheme.background }
+
     MaterialTheme(
-        colorScheme = when (theme) {
-            Theme.AUTO -> if (isSystemInDarkTheme()) darkScheme else lightScheme
-            Theme.LIGHT -> lightScheme
-            Theme.DARK -> darkScheme
-        },
+        colorScheme = colorScheme,
         shapes = AppShape,
         typography = appTypography(),
         content = content
