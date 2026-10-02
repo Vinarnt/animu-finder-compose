@@ -54,6 +54,7 @@ struct VideoPlayer {
     // Output scaling
     int32_t output_width;
     int32_t output_height;
+    int     caps_applied; // BGRA pinned on the appsink; see nvp_set_output_size.
 
     // Metadata
     pthread_mutex_t meta_lock;
@@ -485,14 +486,15 @@ int32_t nvp_get_frame_height(VideoPlayer* p) {
 }
 
 int32_t nvp_set_output_size(VideoPlayer* p, int32_t width, int32_t height) {
-    if (!p || width <= 0 || height <= 0) return 0;
+    if (!p) return 0;
     p->output_width = width;
     p->output_height = height;
 
+    if (p->caps_applied) return 1;
+    p->caps_applied = 1;
+
     GstCaps* caps = gst_caps_new_simple("video/x-raw",
         "format", G_TYPE_STRING, "BGRA",
-        "width", G_TYPE_INT, (gint)width,
-        "height", G_TYPE_INT, (gint)height,
         NULL);
     gst_app_sink_set_caps(GST_APP_SINK(p->video_sink), caps);
     gst_caps_unref(caps);

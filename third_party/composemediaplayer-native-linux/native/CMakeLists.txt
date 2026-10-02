@@ -40,10 +40,10 @@ target_compile_options(NativeVideoPlayer PRIVATE
     -fPIC
 )
 
-# Determine output directory. Patched vs upstream: always the OS-level `linux/` directory,
-# because this tree doubles as Nucleus's appResourcesRootDir — its `linux/` subdirectory
-# (JvmOs.Linux.id) is copied into the packaged app's resources dir, which the launcher puts on
-# java.library.path. The architecture is implicit in the build.
+# Determine output directory. Patched vs upstream: always the OS-level `linux/` directory rather
+# than an arch-suffixed one, so `dist/linux/` can be copied into the app's resources as
+# `composemediaplayer/native/<platform>/libNativeVideoPlayer.so` (see desktopApp/build.gradle.kts).
+# The architecture is implicit in the build.
 if(DEFINED ENV{NATIVE_LIBS_OUTPUT_DIR})
     set(BASE_OUTPUT_DIR "$ENV{NATIVE_LIBS_OUTPUT_DIR}")
 else()

@@ -21,7 +21,6 @@ import fr.vinarnt.animu.finder.compose.ui.component.anime.detail.AnimeDetailHero
 import fr.vinarnt.animu.finder.compose.ui.component.anime.detail.AnimeDetailLayout
 import fr.vinarnt.animu.finder.compose.ui.component.anime.detail.resolveAnimeTitle
 import fr.vinarnt.animu.finder.compose.ui.component.base.layout.MainLayout
-import fr.vinarnt.animu.finder.compose.ui.component.button.SettingButton
 import fr.vinarnt.animu.finder.compose.ui.component.navigation.bar.NavigationBar
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeDetailViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -49,9 +48,7 @@ class AnimeDetailScreen(private val malId: Int) : Screen {
                     title = anime?.let { resolveAnimeTitle(it, unknownFallback) },
                     overlay = true,
                     scrolled = scrolled,
-                ) {
-                    SettingButton(onGlass = !scrolled)
-                }
+                )
             },
             scrollable = false,
             overlayTopBar = true

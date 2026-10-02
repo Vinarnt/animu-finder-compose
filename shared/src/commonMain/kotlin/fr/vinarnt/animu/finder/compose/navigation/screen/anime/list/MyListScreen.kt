@@ -22,7 +22,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.ui.component.BookmarkIcon
 import fr.vinarnt.animu.finder.compose.ui.component.base.layout.MainLayout
-import fr.vinarnt.animu.finder.compose.ui.component.button.SettingButton
 import fr.vinarnt.animu.finder.compose.ui.component.card.AnimeCard
 import fr.vinarnt.animu.finder.compose.ui.component.navigation.bar.NavigationBar
 import fr.vinarnt.animu.finder.compose.ui.theme.SectionTitleTypography
@@ -47,9 +46,7 @@ class MyListScreen : Screen {
 
         MainLayout(
             topBar = {
-                NavigationBar(title = myListStrings.title) {
-                    SettingButton()
-                }
+                NavigationBar(title = myListStrings.title)
             },
             scrollable = false
         ) {

@@ -21,12 +21,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.model.AnimeGenre
 import fr.vinarnt.animu.finder.compose.navigation.screen.anime.detail.EpisodeDetailScreen
-import fr.vinarnt.animu.finder.compose.ui.component.BookmarkIcon
 import fr.vinarnt.animu.finder.compose.ui.component.anime.list.HomeHeader
 import fr.vinarnt.animu.finder.compose.ui.component.anime.list.HomeShelfSpec
 import fr.vinarnt.animu.finder.compose.ui.component.base.layout.MainLayout
-import fr.vinarnt.animu.finder.compose.ui.component.button.GlassIconButton
-import fr.vinarnt.animu.finder.compose.ui.component.button.SettingButton
 import fr.vinarnt.animu.finder.compose.ui.component.navigation.bar.NavigationBar
 import fr.vinarnt.animu.finder.compose.ui.theme.Size
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
@@ -80,15 +77,7 @@ class AnimeListScreen : Screen {
                     brand = strings.navigation.appName,
                     overlay = true,
                     scrolled = scrolled,
-                ) {
-                    GlassIconButton(
-                        imageVector = BookmarkIcon,
-                        contentDescription = strings.myList.title,
-                        onClick = { navigator.push(MyListScreen()) },
-                        onGlass = !scrolled,
-                    )
-                    SettingButton(onGlass = !scrolled)
-                }
+                )
             },
             overlayTopBar = true,
             scrollable = false

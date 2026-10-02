@@ -67,9 +67,6 @@ kotlin {
             dependsOn(commonMain)
             dependencies {
                 implementation(libs.ktor.persistent.cache)
-                // Desktop/native/mobile video playback. Renders decoded frames into a
-                // Compose Canvas on desktop, so it works on Nucleus/Tao (no AWT/SkiaLayer).
-                // Native libs ship inside the JVM artifact — no runtime download.
                 implementation(libs.composemediaplayer)
             }
         }

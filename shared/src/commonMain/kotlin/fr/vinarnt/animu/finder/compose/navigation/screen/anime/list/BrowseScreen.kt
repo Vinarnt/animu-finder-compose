@@ -23,7 +23,6 @@ import fr.vinarnt.animu.finder.compose.ui.component.anime.list.BrowseEmptyResult
 import fr.vinarnt.animu.finder.compose.ui.component.anime.list.BrowseHeader
 import fr.vinarnt.animu.finder.compose.ui.component.base.layout.MainLayout
 import fr.vinarnt.animu.finder.compose.ui.component.base.rememberDebouncedCallback
-import fr.vinarnt.animu.finder.compose.ui.component.button.SettingButton
 import fr.vinarnt.animu.finder.compose.ui.component.card.AnimeCard
 import fr.vinarnt.animu.finder.compose.ui.component.navigation.bar.NavigationBar
 import fr.vinarnt.animu.finder.compose.ui.theme.Size
@@ -80,9 +79,7 @@ class BrowseScreen(
 
         MainLayout(
             topBar = {
-                NavigationBar(title = strings.animeList.browseTitle) {
-                    SettingButton()
-                }
+                NavigationBar(title = strings.animeList.browseTitle)
             },
             scrollable = false
         ) {

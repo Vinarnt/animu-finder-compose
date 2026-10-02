@@ -51,10 +51,10 @@ import org.koin.compose.koinInject
 /**
  * Reusable Cloudflare clearance capture for any provider host.
  *
- * Loads the site in an in-app WebView so the user can clear the challenge; "Capture"
- * reads the (HttpOnly) `cf_clearance` cookie plus the WebView's User-Agent and persists
- * both — Cloudflare binds the cookie to that User-Agent. A manual paste fallback is
- * always available (and is the only path on wasm).
+ * Loads the site in an in-app WebView so the user can clear the challenge. "Capture" reads the
+ * (HttpOnly) `cf_clearance` cookie and the WebView's User-Agent and persists both, since
+ * Cloudflare binds the cookie to that User-Agent. A manual paste fallback is always available,
+ * and is the only path on wasm.
  */
 class CloudflareClearanceScreen(
     private val label: String,

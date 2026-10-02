@@ -79,17 +79,15 @@ private fun CloudflareChallengeOverlay(
     }
 
     val state = rememberWebViewState(url)
-    // Must be the WebView's own cookie manager: on desktop the native cookie store is
-    // attached to it inside the WebView composable, and a freshly constructed
-    // WebViewCookieManager() is unattached — its getCookies() silently returns an empty
-    // list, so the clearance could never be captured. (Android/iOS use a global store, so
-    // this is equivalent there.)
+    // Has to be the WebView's own cookie manager. On desktop the native cookie store is attached
+    // to it inside the WebView composable, and a freshly constructed WebViewCookieManager() is
+    // unattached, so its getCookies() returns an empty list and the clearance is never captured.
+    // (Android/iOS use a global store, so either instance works there.)
     val cookieManager = state.cookieManager
-    // Deliberately do NOT pin a desktop Chrome User-Agent here. The desktop engine is
-    // WebKit2GTK (Android WebView / WKWebView on mobile), and Cloudflare Turnstile
-    // fingerprints the engine — a Chrome UA on WebKit leaves the challenge spinning and
-    // failing. The engine default is used, and the UA it actually reports is stored with
-    // the cookie below.
+    // No desktop Chrome User-Agent here. The desktop engine is WebKit2GTK (Android WebView /
+    // WKWebView on mobile) and Turnstile fingerprints the engine, so a Chrome UA on WebKit leaves
+    // the challenge spinning. The engine default is used, and the UA it reports is stored with the
+    // cookie below.
 
     // Poll for the clearance cookie; cf_clearance is HttpOnly, so a JS read can't see it.
     LaunchedEffect(host) {
@@ -98,8 +96,8 @@ private fun CloudflareChallengeOverlay(
             val cookies = runCatching { cookieManager.getCookies(url) }.getOrDefault(emptyList())
             if (cookies.any { it.name == "cf_clearance" }) {
                 val header = cookies.joinToString("; ") { "${it.name}=${it.value}" }
-                // Cloudflare binds `cf_clearance` to the UA that passed the challenge, so
-                // store the UA the engine actually reported (not a spoofed one).
+                // Cloudflare binds `cf_clearance` to the UA that passed the challenge, so store
+                // the one the engine reported.
                 val userAgent = state.webView?.userAgentOrNull()
                     ?: platformUserAgent()
                     ?: DEFAULT_USER_AGENT
