@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.rememberWindowState
+import com.skydoves.compose.hotswan.interpreter.runtime.InternalHotSwanApi
+import com.skydoves.compose.hotswan.interpreter.runtime.installInterpreterBaselineDesktop
 import dev.nucleusframework.application.DecoratedWindow
 import dev.nucleusframework.application.NucleusBackend
 import dev.nucleusframework.application.nucleusApplication
@@ -45,7 +47,9 @@ import fr.vinarnt.animu.finder.compose.window.rememberInitialWindowSize
  * Player fullscreen is [PlayerFullscreenWindowEffect]; the window size it relies on is
  * [rememberInitialWindowSize].
  */
+@OptIn(InternalHotSwanApi::class)
 fun main() {
+    installInterpreterBaselineDesktop()
     initKermitLogging()
     nucleusApplication(backend = NucleusBackend.Tao) {
         val windowState = rememberWindowState(

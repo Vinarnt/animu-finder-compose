@@ -22,6 +22,15 @@ Compose/CMP work: load the compose skill first; it picks the path and the files 
 
 There are no tests in this project.
 
+## Hot reload — Compose HotSwan
+
+Hot reload is **Compose HotSwan** (`com.github.skydoves.compose.hotswan.compiler`, version pinned in `libs.versions.toml`). The plugin is applied to `shared` (it owns the iOS framework and the desktop target) and to `androidApp`; `desktopApp` declares `interpreter-runtime-core` and its `main()` calls `installInterpreterBaselineDesktop()` (needs `@OptIn(InternalHotSwanApi::class)`).
+
+- The Compose Hot Reload plugin bundled with Compose Multiplatform is **disabled** by `org.jetbrains.compose.hot.reload.disable=true` in `gradle.properties`. Do not re-apply `org.jetbrains.compose.hot-reload` — one reload engine only.
+- The Gradle plugin version must match the installed IDE plugin version (Settings → Plugins → Compose HotSwan). CMP 1.12.0 is newer than HotSwan's verified 1.11.x band; it warns rather than fails.
+- Agent-driven iteration goes through the `hotswan` MCP server (`opencode.jsonc`); it is a stdio bridge to the running IDE plugin, discovered via `.hotswan/bridge.json`.
+- Instrumentation skips generic composables (`<T>`): they still work, but edits to their bodies need a full build. HotSwan logs these as `[HotSwan v2] SKIPPED … GENERIC_DECLARATION`.
+
 ## Architecture Overview
 
 **Stack:** Kotlin Multiplatform (Android, iOS, Desktop JVM, WasmJS) + Compose Multiplatform + Material3, using the new default KMP project structure. Shared code lives in the `shared` KMP library; each platform's runnable app is its own module (`androidApp`, `desktopApp`, `webApp`).

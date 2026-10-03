@@ -21,6 +21,7 @@ kotlin {
         implementation(libs.ktor.client.java)
         implementation(libs.composemediaplayer)
         implementation(libs.composewebview)
+        implementation(libs.hotswan.interpreter.runtime.core)
         implementation(libs.nucleus.application)
         implementation(libs.nucleus.decorated.window.tao)
         implementation(libs.nucleus.core.runtime)
