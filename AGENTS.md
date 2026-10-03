@@ -29,6 +29,7 @@ Hot reload is **Compose HotSwan** (`com.github.skydoves.compose.hotswan.compiler
 - The Compose Hot Reload plugin bundled with Compose Multiplatform is **disabled** by `org.jetbrains.compose.hot.reload.disable=true` in `gradle.properties`. Do not re-apply `org.jetbrains.compose.hot-reload` — one reload engine only.
 - The Gradle plugin version must match the installed IDE plugin version (Settings → Plugins → Compose HotSwan). CMP 1.12.0 is newer than HotSwan's verified 1.11.x band; it warns rather than fails.
 - Agent-driven iteration goes through the `hotswan` MCP server (`opencode.jsonc`); it is a stdio bridge to the running IDE plugin, discovered via `.hotswan/bridge.json`.
+- Load the `hotswan` skill (`.agents/skills/hotswan/SKILL.md`) before a hot-reload pass: it carries the official HotSwan agent workflow — what applies in place, what restarts the app, the edits that are silently skipped, and the MCP tool order.
 - Instrumentation skips generic composables (`<T>`): they still work, but edits to their bodies need a full build. HotSwan logs these as `[HotSwan v2] SKIPPED … GENERIC_DECLARATION`.
 
 ## Architecture Overview
