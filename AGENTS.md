@@ -2,6 +2,8 @@
 
 This file provides guidance to AI coding agents (OpenCode, Claude Code, Codex, Cursor, etc.) when working with code in this repository.
 
+Compose/CMP work: load the compose skill first; it picks the path and the files to read.
+
 ## Build & Run Commands
 
 ```shell

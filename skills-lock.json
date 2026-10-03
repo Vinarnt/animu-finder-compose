@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "compose": {
+      "source": "Meet-Miyani/compose-skill",
+      "sourceType": "github",
+      "skillPath": "skills/compose/SKILL.md",
+      "computedHash": "1c190231c0cd9d6e8520a8abebabbf5140776b1a418990bf90747cf08741588a"
+    },
+    "compose-architecture": {
+      "source": "Meet-Miyani/compose-skill",
+      "sourceType": "github",
+      "skillPath": "skills/compose-architecture/SKILL.md",
+      "computedHash": "241f465725660e6472786285933a977052a4e2dae384511cb28baf145fdd53c8"
+    },
+    "compose-data": {
+      "source": "Meet-Miyani/compose-skill",
+      "sourceType": "github",
+      "skillPath": "skills/compose-data/SKILL.md",
+      "computedHash": "156423fe8074ff0b5cca2b62f39d975f1ab6593af6b2c4df3697a087af4fded8"
+    },
+    "compose-feature": {
+      "source": "Meet-Miyani/compose-skill",
+      "sourceType": "github",
+      "skillPath": "skills/compose-feature/SKILL.md",
+      "computedHash": "753f0406373637d65e35aee401792710b99a3e260a4fbde1a019a466e60c0176"
+    },
+    "compose-platform": {
+      "source": "Meet-Miyani/compose-skill",
+      "sourceType": "github",
+      "skillPath": "skills/compose-platform/SKILL.md",
+      "computedHash": "259b365a340529de5b29cd7f4bd3b636c8af33719f0d2d193a7d31cc03dfa06b"
+    },
+    "compose-project": {
+      "source": "Meet-Miyani/compose-skill",
+      "sourceType": "github",
+      "skillPath": "skills/compose-project/SKILL.md",
+      "computedHash": "44652f00151a8a71db5084fc69b56c3b0081b0a1efe4bbb4dd1075df46ad351b"
+    },
+    "compose-ui": {
+      "source": "Meet-Miyani/compose-skill",
+      "sourceType": "github",
+      "skillPath": "skills/compose-ui/SKILL.md",
+      "computedHash": "c56b77efa40d292699841ca666635b6fce753875a31eddbb5e4dd8046b11c892"
+    }
+  }
+}
