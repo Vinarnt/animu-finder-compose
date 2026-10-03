@@ -10,20 +10,18 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 
 /**
- * The window controls the host wants drawn inside the app's own top bar.
+ * The window controls the host wants drawn inside the app's top bar.
  *
- * On desktop the app's top bar is the window's title bar, so the shell hands it the platform's
- * minimize / maximize / close controls and the bar lays them out at the edge they belong to. That
- * keeps the title and the app's own actions from ending up underneath them, without the app having
- * to know how wide the platform's controls are.
+ * On desktop the app bar is the window's title bar, so the shell hands it the platform's minimize,
+ * maximize and close controls. The bar puts them on the edge they belong to, which keeps the title
+ * and the app's actions clear of them.
  *
- * [leading] is for the platforms that put the controls on the left (the macOS traffic lights, which
- * are native buttons: reserving their footprint is all that is needed); [trailing] is for the ones
- * that put them on the right. Both are empty off desktop, and on any platform whose chrome keeps
- * the controls to itself.
+ * [leading] holds controls drawn on the left, which means the macOS traffic lights: those are native
+ * buttons, so reserving their space is all that is needed. [trailing] holds the ones on the right.
+ * Both are empty off desktop.
  *
- * [buttonSize] and [iconSize] describe how that platform draws a control, so the bar's own buttons
- * can be laid out to match instead of looking like a different family of widget next to them.
+ * [buttonSize] and [iconSize] are how that platform draws a control, so the bar's own buttons match
+ * instead of looking like a different kind of widget beside them.
  */
 data class WindowControlsHost(
     val leading: (@Composable () -> Unit)? = null,
@@ -38,21 +36,18 @@ data class WindowControlsHost(
 val LocalWindowControlsHost = staticCompositionLocalOf { WindowControlsHost() }
 
 /**
- * Whether the app's top bar is currently sitting on top of the page's artwork rather than on a
- * plain surface. Written by the bar, read by the host.
+ * Whether the app bar is currently over artwork rather than a plain surface. The bar writes it and
+ * the host reads it.
  *
- * It decides which artwork the platform's window controls use: over a hero the bar is kept dark so
- * the title and the controls stay readable on any still, and the controls have to follow that
- * rather than the app's own light or dark theme.
+ * It picks which artwork the window controls use. Over a hero the bar stays dark so the title and
+ * controls read against any still, so the controls follow that rather than the app theme.
  */
 val LocalAppBarOnImage = compositionLocalOf { mutableStateOf(false) }
 
 /**
- * Color the host should paint the window with, read from the app theme.
+ * Color the host paints the window with, taken from the app theme.
  *
- * Only the gaps Compose leaves matter: the frames drawn during a live resize, and the moment
- * between the window appearing and the first screen composing. The window chrome paints no
- * background of its own, so the page behind it shows through, which leaves this as the only color
- * behind those gaps.
+ * It only shows through the gaps Compose leaves: frames during a resize, and the moment before the
+ * first screen composes. The chrome paints no background of its own, so the page shows through it.
  */
 val LocalWindowBackgroundColor = compositionLocalOf { mutableStateOf<Color?>(null) }

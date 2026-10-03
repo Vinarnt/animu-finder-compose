@@ -9,7 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import fr.vinarnt.animu.finder.compose.model.StreamSource
-import fr.vinarnt.animu.finder.compose.ui.theme.Breakpoints
+import fr.vinarnt.animu.finder.compose.ui.theme.WindowSizeClass
+import fr.vinarnt.animu.finder.compose.ui.theme.windowSizeClass
 import fr.vinarnt.animu.finder.compose.ui.theme.Size
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
 import fr.vinarnt.jikan4k.models.GetAnimeByIdEpisodes200ResponseDataInner
@@ -39,7 +40,7 @@ fun EpisodeDetailLayout(
     BoxWithConstraints(
         modifier = modifier.fillMaxSize()
     ) {
-        val compact = maxWidth < Breakpoints.compactMaxWidth
+        val compact = windowSizeClass().isAtMost(WindowSizeClass.Medium)
         val sidePadding = ((maxWidth - Size.maxContentWidth) / 2f).coerceAtLeast(0.dp)
         val gutter = sidePadding + if (compact) 16.dp else 24.dp
 

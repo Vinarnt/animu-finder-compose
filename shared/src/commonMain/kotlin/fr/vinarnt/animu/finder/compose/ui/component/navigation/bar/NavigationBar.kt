@@ -32,6 +32,7 @@ fun NavigationBar(
     brand: String? = null,
     overlay: Boolean = false,
     scrolled: Boolean = false,
+    onBack: (() -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
     val navigator = LocalNavigator.currentOrThrow
@@ -82,7 +83,7 @@ fun NavigationBar(
                     AppBarIconButton(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = strings.navigation.back,
-                        onClick = { navigator.pop() },
+                        onClick = { (onBack ?: { navigator.pop() }).invoke() },
                         onGlass = onImage,
                     )
                     // Show home shortcut when at least two screens deep (home -> x -> y).

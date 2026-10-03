@@ -30,9 +30,9 @@ import fr.vinarnt.animu.finder.compose.ui.theme.heroGlass
 /**
  * Icon button for the app's top bar.
  *
- * Where the bar doubles as the window's title bar, the button takes the size, the flat fill and the
- * icon size of the platform's window controls, so the two read as one row of controls. Anywhere
- * else it is the app's own button, with the glass pill when it sits on top of the hero.
+ * Where the app bar is the window's title bar, the button takes the size, flat fill and icon size
+ * of the platform's window controls, so the two read as one row. Otherwise it is the app's own
+ * button, with the glass pill when it sits over the hero.
  */
 @Composable
 fun AppBarIconButton(

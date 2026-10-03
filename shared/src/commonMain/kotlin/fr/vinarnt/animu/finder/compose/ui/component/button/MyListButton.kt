@@ -24,7 +24,7 @@ fun MyListButton(onGlass: Boolean = false) {
             imageVector = BookmarkIcon,
             contentDescription = strings.myList.title,
             onClick = {
-                navigator.push(MyListScreen())
+                navigator.openAppBarDestination(MyListScreen())
             },
             onGlass = onGlass,
         )

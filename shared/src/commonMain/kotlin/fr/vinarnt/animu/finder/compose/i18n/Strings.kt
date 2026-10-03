@@ -63,6 +63,7 @@ data class SettingStrings(
     val appearance: String,
     val general: String,
     val playback: String,
+    val debug: String,
     val defaultQuality: String,
     val preferredSubtitles: String,
     val autoplayNext: String,

@@ -67,6 +67,7 @@ val FrStrings = Strings(
         appearance = "Apparence",
         general = "Général",
         playback = "Lecture",
+        debug = "Débogage",
         defaultQuality = "Qualité par défaut",
         preferredSubtitles = "Sous-titres préférés",
         autoplayNext = "Lecture automatique",
@@ -77,7 +78,7 @@ val FrStrings = Strings(
         subtitleLanguageNone = "Aucun",
         cloudflare = SettingCloudflareStrings(
             label = "Cloudflare",
-            description = "Certains fournisseurs sont protégés par Cloudflare. Résolvez la vérification une fois et Animu Finder réutilise le cookie — pour n'importe quel fournisseur.",
+            description = "Certains fournisseurs sont protégés par Cloudflare. Résolvez la vérification une fois et Animu Finder réutilise le cookie, pour n'importe quel fournisseur.",
             openSite = "Ouvrir dans le navigateur",
             save = "Enregistrer",
             clear = "Effacer",
@@ -85,7 +86,7 @@ val FrStrings = Strings(
             statusMissing = "Non configuré",
             captureHint = "Terminez la vérification Cloudflare, puis appuyez sur Capturer.",
             captureButton = "Capturer",
-            captureFailed = "Cookie introuvable — terminez d'abord la vérification.",
+            captureFailed = "Cookie introuvable. Terminez d'abord la vérification.",
             captureSuccess = "Cookie capturé !",
             captureUnsupported = "La capture intégrée n'est pas disponible ici. Ouvrez le site dans votre navigateur, résolvez la vérification, puis collez le cookie cf_clearance ci-dessous.",
             solving = "En attente de Cloudflare…",
@@ -124,12 +125,12 @@ val FrStrings = Strings(
             AnimeApi.StatusGetAnime.UPCOMING to "À venir"
         ),
         ratingLabels = mapOf(
-            AnimeApi.RatingGetAnime.G to "G – Tout public",
-            AnimeApi.RatingGetAnime.PG to "PG – Enfants",
-            AnimeApi.RatingGetAnime.PG13 to "PG-13 – Ados",
+            AnimeApi.RatingGetAnime.G to "G : Tout public",
+            AnimeApi.RatingGetAnime.PG to "PG : Enfants",
+            AnimeApi.RatingGetAnime.PG13 to "PG-13 : Ados",
             AnimeApi.RatingGetAnime.R17 to "R-17",
             AnimeApi.RatingGetAnime.R to "R+",
-            AnimeApi.RatingGetAnime.RX to "Rx – Hentai"
+            AnimeApi.RatingGetAnime.RX to "Rx : Hentai"
         ),
         genreLabel = "Genre",
         genreCount = { n -> "$n genres" },

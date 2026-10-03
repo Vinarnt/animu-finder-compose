@@ -9,7 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import fr.vinarnt.animu.finder.compose.i18n.strings
-import fr.vinarnt.animu.finder.compose.ui.theme.Breakpoints
+import fr.vinarnt.animu.finder.compose.ui.theme.WindowSizeClass
+import fr.vinarnt.animu.finder.compose.ui.theme.windowSizeClass
 import fr.vinarnt.animu.finder.compose.ui.theme.Size
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
 import fr.vinarnt.animu.finder.compose.ui.theme.onScrim
@@ -35,7 +36,7 @@ fun AnimeDetailHero(
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth()
     ) {
-        val compact = maxWidth < Breakpoints.compactMaxWidth
+        val compact = windowSizeClass().isAtMost(WindowSizeClass.Medium)
         val heroHeight = if (compact) Size.Hero.heightCompact else Size.Hero.height
         val sidePadding = ((maxWidth - Size.maxContentWidth) / 2f).coerceAtLeast(0.dp)
         val gutter = if (compact) 16.dp else 24.dp

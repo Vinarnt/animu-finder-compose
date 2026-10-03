@@ -13,7 +13,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.model.EpisodeDisplay
 import fr.vinarnt.animu.finder.compose.navigation.screen.anime.detail.EpisodeDetailScreen
-import fr.vinarnt.animu.finder.compose.ui.theme.Breakpoints
+import fr.vinarnt.animu.finder.compose.ui.theme.WindowSizeClass
+import fr.vinarnt.animu.finder.compose.ui.theme.windowSizeClass
 import fr.vinarnt.animu.finder.compose.ui.theme.Size
 import fr.vinarnt.animu.finder.compose.util.animeArtworkUrl
 import fr.vinarnt.animu.finder.compose.viewmodel.AnimeDetailViewModel
@@ -39,7 +40,7 @@ fun AnimeDetailLayoutContent(modifier: Modifier = Modifier, lazyListState: LazyL
     BoxWithConstraints(
         modifier = modifier.fillMaxSize()
     ) {
-        val compact = maxWidth < Breakpoints.compactMaxWidth
+        val compact = windowSizeClass().isAtMost(WindowSizeClass.Medium)
         val sidePadding = ((maxWidth - Size.maxContentWidth) / 2f).coerceAtLeast(0.dp)
         val gutter = sidePadding + if (compact) 16.dp else 24.dp
 

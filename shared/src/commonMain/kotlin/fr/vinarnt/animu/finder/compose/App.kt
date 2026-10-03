@@ -1,8 +1,11 @@
 package fr.vinarnt.animu.finder.compose
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.lyricist.ProvideStrings
@@ -16,6 +19,7 @@ import fr.vinarnt.animu.finder.compose.i18n.StringsMap
 import fr.vinarnt.animu.finder.compose.navigation.screen.anime.list.AnimeListScreen
 import fr.vinarnt.animu.finder.compose.ui.component.setting.CloudflareChallengeHost
 import fr.vinarnt.animu.finder.compose.ui.theme.AppTheme
+import fr.vinarnt.animu.finder.compose.ui.theme.ProvideWindowWidth
 import fr.vinarnt.animu.finder.compose.viewmodel.SettingsViewModel
 import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
@@ -33,11 +37,15 @@ fun App(koinAppDeclaration: KoinAppDeclaration = {}) {
 
         ProvideStrings(lyricist, LocalStrings) {
             AppTheme(theme = theme) {
-                Box {
-                    Navigator(screen = AnimeListScreen()) { navigator ->
-                        CurrentScreen()
+                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                    ProvideWindowWidth {
+                        Box {
+                            Navigator(screen = AnimeListScreen()) { navigator ->
+                                CurrentScreen()
+                            }
+                            CloudflareChallengeHost()
+                        }
                     }
-                    CloudflareChallengeHost()
                 }
             }
         }

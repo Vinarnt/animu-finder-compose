@@ -11,7 +11,8 @@ import androidx.compose.ui.unit.dp
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.ui.component.AddToMyListButton
 import fr.vinarnt.animu.finder.compose.ui.component.HeroCtaButton
-import fr.vinarnt.animu.finder.compose.ui.theme.Breakpoints
+import fr.vinarnt.animu.finder.compose.ui.theme.WindowSizeClass
+import fr.vinarnt.animu.finder.compose.ui.theme.windowSizeClass
 import fr.vinarnt.animu.finder.compose.ui.theme.HeroKickerTypography
 import fr.vinarnt.animu.finder.compose.ui.theme.Size
 import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
@@ -41,8 +42,8 @@ fun HomeHero(
     val posterUrl = anime.images?.webp?.largeImageUrl ?: anime.images?.jpg?.imageUrl
 
     BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
-        val compact = maxWidth < Breakpoints.compactMaxWidth
-        val tablet = !compact && maxWidth < Breakpoints.tabletMaxWidth
+        val compact = windowSizeClass().isAtMost(WindowSizeClass.Medium)
+        val tablet = windowSizeClass() == WindowSizeClass.Expanded
         val sidePadding = ((maxWidth - Size.maxContentWidth) / 2f).coerceAtLeast(0.dp)
         val hPad = if (compact) 16.dp else 24.dp
 

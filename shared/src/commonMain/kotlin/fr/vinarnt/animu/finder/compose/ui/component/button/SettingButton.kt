@@ -25,7 +25,7 @@ fun SettingButton(onGlass: Boolean = false) {
             imageVector = Icons.Default.Settings,
             contentDescription = strings.settings.title,
             onClick = {
-                navigator += SettingScreen()
+                navigator.openAppBarDestination(SettingScreen())
             },
             onGlass = onGlass,
         )

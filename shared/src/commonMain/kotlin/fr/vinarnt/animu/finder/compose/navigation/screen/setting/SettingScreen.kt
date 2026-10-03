@@ -1,14 +1,10 @@
 package fr.vinarnt.animu.finder.compose.navigation.screen.setting
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -16,15 +12,6 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import fr.vinarnt.animu.finder.compose.i18n.strings
 import fr.vinarnt.animu.finder.compose.ui.component.base.layout.MainLayout
 import fr.vinarnt.animu.finder.compose.ui.component.navigation.bar.NavigationBar
-import fr.vinarnt.animu.finder.compose.ui.component.setting.SettingsAutoplaySwitch
-import fr.vinarnt.animu.finder.compose.ui.component.setting.SettingsCloudflareClearances
-import fr.vinarnt.animu.finder.compose.ui.component.setting.SettingsGroup
-import fr.vinarnt.animu.finder.compose.ui.component.setting.SettingsLanguageSelect
-import fr.vinarnt.animu.finder.compose.ui.component.setting.SettingsQualitySelect
-import fr.vinarnt.animu.finder.compose.ui.component.setting.SettingsSubtitlesSelect
-import fr.vinarnt.animu.finder.compose.ui.component.setting.SettingsThemeSelect
-import fr.vinarnt.animu.finder.compose.ui.theme.Size
-import fr.vinarnt.animu.finder.compose.ui.theme.Spacing
 import fr.vinarnt.animu.finder.compose.viewmodel.SettingsViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -37,46 +24,32 @@ class SettingScreen : Screen {
     override fun Content() {
         val vm: SettingsViewModel = koinViewModel()
         val navigator = LocalNavigator.currentOrThrow
-        val theme by vm.theme.collectAsStateWithLifecycle()
-        val locale by vm.locale.collectAsStateWithLifecycle()
-        val quality by vm.defaultQuality.collectAsStateWithLifecycle()
-        val subtitles by vm.preferredSubtitles.collectAsStateWithLifecycle()
-        val autoplayNext by vm.autoplayNext.collectAsStateWithLifecycle()
-        val cloudflareClearances by vm.cloudflareClearances.collectAsStateWithLifecycle()
+
+        val back: () -> Unit = { navigator.pop() }
+        var sectionLabel by remember { mutableStateOf<String?>(null) }
+        var leaveSection: (() -> Unit)? by remember { mutableStateOf(null) }
+        val section = sectionLabel
+        val sectionBack = leaveSection
 
         MainLayout(
-            topBar = { NavigationBar(strings.settings.title) }
+            topBar = {
+                NavigationBar(
+                    title = section ?: strings.settings.title,
+                    onBack = if (section != null && sectionBack != null) sectionBack else back,
+                )
+            },
+            scrollable = false,
         ) {
-            Column(
-                modifier = Modifier
-                    .width(Size.maxContentWidth)
-                    .padding(horizontal = Spacing.md)
-                    .padding(top = 28.dp, bottom = Spacing.md),
-                verticalArrangement = Arrangement.spacedBy(Spacing.lg)
-            ) {
-                SettingsGroup(title = strings.settings.appearance.uppercase()) {
-                    SettingsThemeSelect(selected = theme, onSelect = vm::setTheme)
-                }
-
-                SettingsGroup(title = strings.settings.general.uppercase()) {
-                    SettingsLanguageSelect(currentLocale = locale, onSelect = vm::setLocale)
-                }
-
-                SettingsGroup(title = strings.settings.playback.uppercase()) {
-                    SettingsQualitySelect(quality = quality, onSelect = vm::setDefaultQuality)
-                    SettingsSubtitlesSelect(subtitles = subtitles, onSelect = vm::setPreferredSubtitles)
-                    SettingsAutoplaySwitch(enabled = autoplayNext, onChange = vm::setAutoplayNext)
-                }
-
-                SettingsGroup(title = strings.settings.cloudflare.label.uppercase()) {
-                    SettingsCloudflareClearances(
-                        clearances = cloudflareClearances,
-                        onOpen = { site ->
-                            navigator.push(CloudflareClearanceScreen(site.label, site.host))
-                        },
-                    )
-                }
-            }
+            SettingsScreen(
+                vm = vm,
+                onOpenCloudflare = { label, host ->
+                    navigator.push(CloudflareClearanceScreen(label, host))
+                },
+                onSectionChange = { label, leave ->
+                    sectionLabel = label
+                    leaveSection = leave
+                },
+            )
         }
     }
 }
